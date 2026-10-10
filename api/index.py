@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from passlib.context import CryptContext
+import bcrypt
 from . import models, database
 
 # Crear las tablas en la BD si no existen
@@ -18,9 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configuración para encriptar contraseñas
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Esquema de Pydantic para el registro
 class EmpresaCreate(BaseModel):
@@ -48,7 +45,7 @@ def register(empresa: EmpresaCreate, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=400, detail="El email ya está registrado")
     
     # 2. Encriptar contraseña y guardar
-    hashed_pwd = pwd_context.hash(empresa.password)
+    hashed_pwd = bcrypt.hashpw(empresa.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     new_empresa = models.Empresa(
         razon_social=empresa.razon_social,
         nit=empresa.nit,
@@ -69,7 +66,7 @@ def login(empresa: EmpresaLogin, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=400, detail="Credenciales incorrectas (NIT no encontrado)")
     
     # 2. Verificar contraseña
-    if not pwd_context.verify(empresa.password, db_empresa.hashed_password):
+    if not bcrypt.checkpw(empresa.password.encode('utf-8'), db_empresa.hashed_password.encode('utf-8')):
         raise HTTPException(status_code=400, detail="Credenciales incorrectas (contraseña inválida)")
     
     return {
