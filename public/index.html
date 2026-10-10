@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Billzen</title>
+  <!-- La landing vive en Intranet_Cliente/. Esta página solo redirige,
+       para que la raíz del sitio y los enlaces a "index.html" funcionen. -->
+  <meta http-equiv="refresh" content="0; url=Intranet_Cliente/index.html" />
+  <link rel="canonical" href="Intranet_Cliente/index.html" />
+  <script>
+    // Conserva el #ancla (ej: index.html#descargar → landing#descargar)
+    location.replace('Intranet_Cliente/index.html' + location.hash);
+  </script>
+</head>
+<body>
+  <p>Redirigiendo a <a href="Intranet_Cliente/index.html">Billzen</a>…</p>
+</body>
+</html>

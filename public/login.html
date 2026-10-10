@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Iniciar sesión — Billzen</title>
+<meta name="description" content="Accede a tu cuenta Billzen y gestiona tu contabilidad y facturación electrónica desde cualquier lugar." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+<!-- Referencia al nuevo archivo CSS externo -->
+<link rel="stylesheet" href="css/login.css" />
+</head>
+<body>  
+
+<div class="auth-layout">
+
+  <!-- ===================== LEFT ===================== -->
+  <div class="auth-left">
+    <a href="index.html" class="auth-logo">
+      <div class="auth-logo-mark">
+        <svg viewBox="0 0 18 18" fill="none" width="18" height="18">
+          <rect x="2" y="2" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="10" y="2" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+          <rect x="2" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+          <rect x="10" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <span class="auth-logo-name">Bill<em>zen</em></span>
+    </a>
+
+    <div class="auth-left-content">
+      <div class="auth-status-pill">
+        <div class="status-dot"></div>
+        Certificado DIAN &bull; Facturación Electrónica
+      </div>
+
+      <h1 class="auth-headline">
+        Tu empresa,<br/>bajo <em>control</em><br/>total
+      </h1>
+      <p class="auth-sub">
+        Gestiona facturas, contabilidad y finanzas desde un solo lugar. Diseñado para MiPyMEs colombianas que quieren crecer con claridad.
+      </p>
+
+      <div class="auth-features">
+        <div class="auth-feat">
+          <div class="auth-feat-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="auth-feat-body">
+            <div class="auth-feat-title">Facturación electrónica DIAN</div>
+            <div class="auth-feat-desc">Emite, valida y envía facturas en segundos. Cumplimiento total garantizado.</div>
+          </div>
+        </div>
+        <div class="auth-feat">
+          <div class="auth-feat-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><polyline points="2 20 22 20"/>
+            </svg>
+          </div>
+          <div class="auth-feat-body">
+            <div class="auth-feat-title">Dashboard financiero en tiempo real</div>
+            <div class="auth-feat-desc">Ingresos, cartera y flujo de caja actualizados al instante.</div>
+          </div>
+        </div>
+        <div class="auth-feat">
+          <div class="auth-feat-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="auth-feat-body">
+            <div class="auth-feat-title">Cifrado y copias de seguridad</div>
+            <div class="auth-feat-desc">Datos protegidos con cifrado de extremo a extremo y backups automáticos.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-left-divider"></div>
+
+      <div class="auth-testi">
+        <svg class="auth-testi-quote" viewBox="0 0 40 30" fill="none">
+          <path d="M0 30V18C0 7.2 6.4 1.6 19.2 0l2 4C14.8 5.6 11.6 9.2 11.2 14H18V30H0ZM22 30V18C22 7.2 28.4 1.6 41.2 0l2 4C36.8 5.6 33.6 9.2 33.2 14H40V30H22Z" fill="white"/>
+        </svg>
+        <div class="auth-stars">
+          <svg class="auth-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg class="auth-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg class="auth-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg class="auth-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <svg class="auth-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <p class="auth-testi-text">"Billzen transformó nuestra operación. Antes tardábamos dos horas facturando al cierre de mes. Ahora lo hacemos en minutos y la DIAN aprueba todo de primera."</p>
+        <div class="auth-testi-author">
+          <div class="auth-testi-avatar">JR</div>
+          <div class="auth-testi-info">
+            <div class="auth-testi-name">Juan Rodríguez</div>
+            <div class="auth-testi-role">CEO — Comercial López S.A.S</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== RIGHT ===================== -->
+  <div class="auth-right">
+
+    <div class="auth-right-nav">
+      <a href="index.html" class="auth-back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Volver
+      </a>
+      <span class="auth-register-hint" id="switch-hint">
+        ¿No tienes cuenta? <a href="#" onclick="switchTab('register');return false;" id="switch-link">Regístrate gratis</a>
+      </span>
+    </div>
+
+    <div class="auth-card" id="auth-card">
+
+      <!-- Tabs -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" onclick="switchTab('login')">Iniciar sesión</button>
+        <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" onclick="switchTab('register')">Crear cuenta</button>
+      </div>
+
+      <!-- ===== LOGIN ===== -->
+      <div class="auth-panel active" id="panel-login">
+        <div class="auth-form-hd">
+          <h2 class="auth-form-title">Bienvenido de <em>vuelta</em></h2>
+          <p class="auth-form-sub">Accede a tu cuenta con tu NIT y contraseña.</p>
+        </div>
+
+        <form class="auth-form" id="login-form" onsubmit="handleLogin(event)" novalidate>
+
+          <!-- NIT -->
+          <div class="form-group" id="lg-email-grp">
+            <label class="form-label" for="lg-email">NIT de la empresa</label>
+            <div class="form-field">
+              <span class="field-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+              </span>
+              <input type="text" id="lg-email" class="form-input" placeholder="Ej: 900123456" autocomplete="off" required />
+            </div>
+            <span class="field-err">Ingresa el NIT de tu empresa.</span>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group" id="lg-pw-grp">
+            <label class="form-label" for="lg-pw">Contraseña</label>
+            <div class="form-field">
+              <span class="field-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <input type="password" id="lg-pw" class="form-input has-eye" placeholder="••••••••" autocomplete="current-password" required />
+              <button type="button" class="eye-btn" onclick="toggleEye('lg-pw',this)" aria-label="Ver contraseña">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <span class="field-err">Ingresa tu contraseña.</span>
+          </div>
+
+          <!-- Remember / Forgot -->
+          <div class="form-inline-row">
+            <label class="form-check">
+              <input type="checkbox" id="lg-remember" />
+              <span class="form-check-lbl">Recordarme</span>
+            </label>
+            <a href="#" class="forgot-link" onclick="forgotPw(event)">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <button type="submit" class="btn-submit" id="lg-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Ir al Panel de Administración
+          </button>
+
+        </form>
+
+        <p class="auth-note">¿Primera vez? <a href="#" onclick="switchTab('register');return false;">Crea tu cuenta gratis</a></p>
+
+        <div class="auth-security">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span class="auth-security-text">Conexión cifrada · SSL · Datos protegidos</span>
+        </div>
+      </div>
+
+      <!-- ===== REGISTER ===== -->
+      <div class="auth-panel" id="panel-register">
+        <div class="auth-form-hd">
+          <h2 class="auth-form-title">Registra tu <em>empresa</em></h2>
+          <p class="auth-form-sub">Completa los datos de tu empresa y administrador.</p>
+        </div>
+
+        <form class="auth-form" id="reg-form" onsubmit="handleRegister(event)" novalidate>
+
+          <!-- Razón Social y NIT -->
+          <div class="form-group" id="rg-co-grp">
+            <label class="form-label" for="rg-co">Razón Social</label>
+            <div class="form-field">
+              <span class="field-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </span>
+              <input type="text" id="rg-co" class="form-input" placeholder="Comercializadora S.A.S." autocomplete="organization" required />
+            </div>
+          </div>
+          
+          <div class="form-group" id="rg-nit-grp">
+            <label class="form-label" for="rg-nit">NIT de la empresa</label>
+            <div class="form-field">
+              <input type="text" id="rg-nit" class="form-input no-icon" placeholder="900123456" inputmode="numeric" required />
+            </div>
+            <span class="field-err">NIT requerido.</span>
+          </div>
+
+          <!-- Nombres y Apellidos -->
+          <div class="form-row">
+            <div class="form-group" id="rg-fn-grp">
+              <label class="form-label" for="rg-fn">Nombres del Admin</label>
+              <div class="form-field">
+                <input type="text" id="rg-fn" class="form-input no-icon" placeholder="Juan" autocomplete="given-name" required />
+              </div>
+              <span class="field-err">Requerido.</span>
+            </div>
+            <div class="form-group" id="rg-ln-grp">
+              <label class="form-label" for="rg-ln">Apellidos</label>
+              <div class="form-field">
+                <input type="text" id="rg-ln" class="form-input no-icon" placeholder="Rodríguez" autocomplete="family-name" required />
+              </div>
+              <span class="field-err">Requerido.</span>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group" id="rg-em-grp">
+            <label class="form-label" for="rg-em">Correo de la empresa</label>
+            <div class="form-field">
+              <span class="field-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </span>
+              <input type="email" id="rg-em" class="form-input" placeholder="contacto@empresa.com" autocomplete="email" required />
+            </div>
+            <span class="field-err">Correo inválido.</span>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group" id="rg-pw-grp">
+            <label class="form-label" for="rg-pw">Contraseña</label>
+            <div class="form-field">
+              <span class="field-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <input type="password" id="rg-pw" class="form-input has-eye" placeholder="Mínimo 8 caracteres" autocomplete="new-password" oninput="updateStrength(this.value)" required />
+              <button type="button" class="eye-btn" onclick="toggleEye('rg-pw',this)" aria-label="Ver contraseña">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="pw-strength-bars" id="pw-bars">
+              <div class="pw-bar" id="pb1"></div>
+              <div class="pw-bar" id="pb2"></div>
+              <div class="pw-bar" id="pb3"></div>
+              <div class="pw-bar" id="pb4"></div>
+            </div>
+            <span class="field-err">Mínimo 8 caracteres.</span>
+          </div>
+
+          <!-- Terms -->
+          <label class="form-check">
+            <input type="checkbox" id="rg-terms" required />
+            <span class="form-check-lbl">Acepto los <a href="#">términos de uso</a> y <a href="#">política de privacidad</a></span>
+          </label>
+
+          <button type="submit" class="btn-submit" id="rg-btn">
+            Registrar Empresa
+          </button>
+
+        </form>
+
+        <p class="auth-note">¿Ya tienes cuenta? <a href="#" onclick="switchTab('login');return false;">Inicia sesión</a></p>
+
+        <div class="auth-security">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span class="auth-security-text">Cifrado SSL · Datos protegidos</span>
+        </div>
+      </div>
+    </div><!-- /auth-card -->
+  </div><!-- /auth-right -->
+</div><!-- /auth-layout -->
+
+<!-- Referencia al nuevo archivo JS externo -->
+<script src="js/login.js"></script>
+
+</body>
+</html>

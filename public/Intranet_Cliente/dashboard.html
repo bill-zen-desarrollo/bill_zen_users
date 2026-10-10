@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billzen — Panel de Inventario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --bg:        #0b0e17;
+      --bg2:       #111421;
+      --bg3:       #181d2e;
+      --border:    rgba(255,255,255,0.07);
+      --border2:   rgba(255,255,255,0.12);
+      --text1:     #eef0f7;
+      --text2:     #9aa3c2;
+      --text3:     #5c6585;
+      --accent:    #4AE8A4;
+      --accent-dk: #0a6f52;
+      --accent-bg: rgba(74,232,164,0.08);
+      --danger:    #ef4444;
+      --danger-bg: rgba(239,68,68,0.1);
+      --warn:      #f59e0b;
+      --warn-bg:   rgba(245,158,11,0.1);
+      --blue:      #3b82f6;
+      --blue-bg:   rgba(59,130,246,0.1);
+      --purple:    #a78bfa;
+      --purple-bg: rgba(167,139,250,0.1);
+      --sidebar-w: 240px;
+      --radius:    12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text1);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── AUTH SCREENS ─── */
+    .auth-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .auth-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .auth-bg-grid {
+      position: absolute; inset: 0; overflow: hidden;
+    }
+    .auth-bg-grid::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,232,164,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,232,164,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .auth-bg-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(74,232,164,0.06) 0%, transparent 70%);
+      top: -100px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .auth-card {
+      position: relative;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      z-index: 1;
+    }
+
+    .auth-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 28px;
+      text-decoration: none;
+    }
+    .auth-logo-mark {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #0a6f52, #4AE8A4);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-logo-name {
+      font-size: 20px; font-weight: 700; color: var(--text1);
+      letter-spacing: -0.5px;
+    }
+    .auth-logo-name em { font-style: normal; color: var(--accent); }
+
+    .auth-step-indicator {
+      display: flex; gap: 8px; margin-bottom: 28px;
+    }
+    .auth-step-dot {
+      height: 3px; border-radius: 2px;
+      background: var(--border2);
+      flex: 1;
+      transition: background 0.3s;
+    }
+    .auth-step-dot.active { background: var(--accent); }
+    .auth-step-dot.done   { background: var(--accent-dk); }
+
+    .auth-title {
+      font-size: 22px; font-weight: 700;
+      color: var(--text1); margin-bottom: 6px;
+      letter-spacing: -0.4px;
+    }
+    .auth-subtitle {
+      font-size: 13.5px; color: var(--text2);
+      margin-bottom: 28px; line-height: 1.5;
+    }
+    .auth-subtitle strong { color: var(--accent); }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text2); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      color: var(--text1);
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(74,232,164,0.1);
+    }
+    .form-input.error { border-color: var(--danger); }
+
+    .auth-error {
+      background: var(--danger-bg);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13px; color: #fca5a5;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .auth-error.visible { display: block; }
+
+    .btn-primary-full {
+      width: 100%;
+      background: linear-gradient(135deg, #0a6f52, #4AE8A4);
+      border: none; border-radius: var(--radius-sm);
+      padding: 13px 20px;
+      color: #0b0e17; font-family: 'Sora', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      letter-spacing: 0.2px;
+    }
+    .btn-primary-full:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(74,232,164,0.25);
+    }
+    .btn-primary-full:disabled {
+      opacity: 0.6; cursor: not-allowed; transform: none;
+    }
+    .btn-primary-full.loading::after {
+      content: ''; display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #0b0e17;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-left: 10px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .auth-back {
+      background: none; border: none;
+      color: var(--text3); font-family: 'Sora', sans-serif;
+      font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+    }
+    .auth-back:hover { color: var(--text2); }
+
+    /* ─── DASHBOARD LAYOUT ─── */
+    #dashboard { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 22px 20px 18px;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+    }
+    .sidebar-logo-mark {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #0a6f52, #4AE8A4);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sidebar-logo-name {
+      font-size: 16px; font-weight: 700; color: var(--text1);
+      letter-spacing: -0.4px;
+    }
+    .sidebar-logo-name em { font-style: normal; color: var(--accent); }
+
+    .sidebar-section-label {
+      font-size: 10px; font-weight: 700;
+      color: var(--text3); text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 20px 20px 8px;
+    }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding-bottom: 16px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 9px 20px;
+      border-radius: 0;
+      color: var(--text2); font-size: 13.5px; font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+      border: none; background: none; width: 100%; text-align: left;
+      font-family: 'Sora', sans-serif;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text1); }
+    .nav-item.active {
+      background: var(--accent-bg);
+      color: var(--accent);
+      position: relative;
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--accent); border-radius: 0 2px 2px 0;
+    }
+    .nav-item svg { flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg3);
+      margin-bottom: 10px;
+    }
+    .sidebar-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #0a6f52, #4AE8A4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #0b0e17;
+      flex-shrink: 0;
+    }
+    .sidebar-user-name { font-size: 12.5px; font-weight: 600; color: var(--text1); }
+    .sidebar-user-role { font-size: 11px; color: var(--text3); }
+
+    .btn-logout {
+      width: 100%;
+      background: none; border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: var(--text3); font-family: 'Sora', sans-serif;
+      font-size: 12.5px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-logout:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    /* Main content */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .topbar-subtitle { font-size: 12.5px; color: var(--text3); margin-top: 2px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .badge-nit {
+      background: var(--accent-bg);
+      border: 1px solid rgba(74,232,164,0.2);
+      color: var(--accent);
+      font-size: 11.5px; font-weight: 600;
+      padding: 4px 10px; border-radius: 99px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Page content */
+    .page-content { padding: 28px; flex: 1; }
+
+    /* KPI cards */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .kpi-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .kpi-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .kpi-card.green::before { background: linear-gradient(90deg, var(--accent), var(--accent-dk)); }
+    .kpi-card.blue::before  { background: linear-gradient(90deg, var(--blue), #6366f1); }
+    .kpi-card.warn::before  { background: linear-gradient(90deg, var(--warn), #f97316); }
+    .kpi-card.purple::before{ background: linear-gradient(90deg, var(--purple), #ec4899); }
+
+    .kpi-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .kpi-icon.green  { background: var(--accent-bg); }
+    .kpi-icon.blue   { background: var(--blue-bg); }
+    .kpi-icon.warn   { background: var(--warn-bg); }
+    .kpi-icon.purple { background: var(--purple-bg); }
+
+    .kpi-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 28px; font-weight: 700; color: var(--text1); margin-top: 4px; letter-spacing: -1px; }
+    .kpi-meta  { font-size: 11.5px; color: var(--text3); margin-top: 4px; }
+
+    /* Table card */
+    .table-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .table-header-left { }
+    .table-header-title { font-size: 15px; font-weight: 700; }
+    .table-header-sub   { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    .table-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    .search-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+    }
+    .search-box input {
+      background: none; border: none; outline: none;
+      color: var(--text1); font-family: 'Sora', sans-serif;
+      font-size: 13px; width: 180px;
+    }
+    .search-box input::placeholder { color: var(--text3); }
+
+    .btn-action {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 14px; border-radius: var(--radius-sm);
+      font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; border: none;
+    }
+    .btn-action.primary {
+      background: linear-gradient(135deg, #0a6f52, #4AE8A4);
+      color: #0b0e17;
+    }
+    .btn-action.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(74,232,164,0.25); }
+    .btn-action.secondary {
+      background: var(--bg3); border: 1px solid var(--border2);
+      color: var(--text2);
+    }
+    .btn-action.secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-action.danger-outline {
+      background: none; border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger);
+    }
+    .btn-action.danger-outline:hover { background: var(--danger-bg); }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 13.5px;
+    }
+    thead th {
+      padding: 12px 22px; text-align: left;
+      font-size: 11px; font-weight: 700;
+      color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.025); }
+    tbody td {
+      padding: 14px 22px;
+      color: var(--text1); vertical-align: middle;
+    }
+
+    .td-mono { font-family: 'DM Mono', monospace; font-size: 12.5px; color: var(--text2); }
+
+    .cat-pill {
+      display: inline-block;
+      padding: 3px 10px; border-radius: 99px;
+      font-size: 11.5px; font-weight: 600;
+      background: var(--blue-bg); color: var(--blue);
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+
+    .stock-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600;
+    }
+    .stock-pill.ok { background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(74,232,164,0.2); }
+    .stock-pill.low { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+    .stock-pill.out { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+
+    .row-actions { display: flex; gap: 6px; }
+    .icon-btn {
+      width: 30px; height: 30px; border-radius: var(--radius-sm);
+      background: none; border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; color: var(--text3);
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+    .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
+    /* Botón actualizar precio — amarillo */
+    .icon-btn.icon-warn { color: var(--warn); border-color: rgba(245,158,11,0.3); }
+    .icon-btn.icon-warn:hover { border-color: var(--warn); background: var(--warn-bg); }
+    /* Botón ingresar stock — azul */
+    .icon-btn.icon-blue { color: var(--blue); border-color: rgba(59,130,246,0.3); }
+    .icon-btn.icon-blue:hover { border-color: var(--blue); background: var(--blue-bg); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--text3);
+    }
+    .empty-state svg { margin-bottom: 16px; opacity: 0.4; }
+    .empty-state p { font-size: 14px; }
+
+    /* Loading rows */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg3) 25%, rgba(255,255,255,0.04) 50%, var(--bg3) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px; height: 14px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ─── MODAL ─── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+    .modal-backdrop.open { opacity: 1; visibility: visible; }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%; max-width: 460px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      transform: translateY(12px) scale(0.98);
+      transition: transform 0.2s;
+    }
+    .modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text3);
+      transition: color 0.15s, background 0.15s;
+    }
+    .modal-close:hover { color: var(--text1); background: var(--border2); }
+
+    .modal-form-group { margin-bottom: 16px; }
+    .modal-label {
+      display: block; font-size: 11.5px; font-weight: 600;
+      color: var(--text3); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 7px;
+    }
+    .modal-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text1); font-family: 'Sora', sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,232,164,0.1); }
+
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      margin-top: 24px;
+    }
+
+    .modal-error {
+      background: var(--danger-bg);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 12.5px; color: #fca5a5;
+      margin-bottom: 16px; display: none;
+    }
+    .modal-error.visible { display: block; }
+
+    /* Toast */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 13px 16px;
+      min-width: 280px; max-width: 380px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+      font-size: 13.5px;
+      animation: toast-in 0.3s ease;
+    }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .toast.success { border-left: 3px solid var(--accent); }
+    .toast.error   { border-left: 3px solid var(--danger); }
+    .toast.warn    { border-left: 3px solid var(--warn); }
+    .toast-icon-wrap svg { flex-shrink: 0; }
+    .toast-text { font-weight: 500; flex: 1; }
+
+    /* Confirm modal */
+    .confirm-modal { max-width: 380px; text-align: center; }
+    .confirm-icon {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: var(--danger-bg);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .confirm-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .confirm-msg   { font-size: 13.5px; color: var(--text2); line-height: 1.5; }
+    .confirm-footer { display: flex; justify-content: center; gap: 12px; margin-top: 24px; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .page-content { padding: 16px; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     DASHBOARD (acceso directo tras login de empresa)
+═══════════════════════════════════════════ -->
+<div id="dashboard" style="display:flex;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="#" class="sidebar-logo">
+      <div class="sidebar-logo-mark">
+        <svg viewBox="0 0 18 18" fill="none" width="16" height="16">
+          <rect x="2" y="2" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="10" y="2" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+          <rect x="2" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+          <rect x="10" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-name">Bill<em>zen</em></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Módulos</div>
+
+      <button class="nav-item active" data-module="inventario">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        Inventario
+      </button>
+
+      <div class="sidebar-section-label" style="margin-top:8px;">Próximamente</div>
+
+      <button class="nav-item" disabled style="opacity:0.4;cursor:not-allowed;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        Facturación
+      </button>
+
+      <button class="nav-item" disabled style="opacity:0.4;cursor:not-allowed;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Contactos
+      </button>
+
+      <button class="nav-item" disabled style="opacity:0.4;cursor:not-allowed;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+          <polyline points="2 20 22 20"/>
+        </svg>
+        Finanzas
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">--</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-username">Empresa</div>
+          <div class="sidebar-user-role" id="sidebar-userrole">Sesión activa</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="btn-logout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Módulo de Inventario</div>
+        <div class="topbar-subtitle">Gestión de productos y stock en tiempo real</div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge-nit" id="topbar-nit">NIT —</span>
+        <button class="btn-action secondary" id="btn-refresh-top" title="Recargar catálogo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Actualizar
+        </button>
+      </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+
+      <!-- KPIs -->
+      <div class="kpi-row" id="kpi-row">
+        <div class="kpi-card green">
+          <div class="kpi-icon green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4AE8A4" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="kpi-label">Total Productos</div>
+          <div class="kpi-value" id="kpi-total">—</div>
+          <div class="kpi-meta">En catálogo</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-icon blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div class="kpi-label">Stock Total</div>
+          <div class="kpi-value" id="kpi-stock">—</div>
+          <div class="kpi-meta">Unidades</div>
+        </div>
+        <div class="kpi-card warn">
+          <div class="kpi-icon warn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="kpi-label">Stock Bajo</div>
+          <div class="kpi-value" id="kpi-low">—</div>
+          <div class="kpi-meta">&lt; 10 unidades</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-icon purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="kpi-label">Valor Inventario</div>
+          <div class="kpi-value" id="kpi-valor">—</div>
+          <div class="kpi-meta">COP estimado</div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-left">
+            <div class="table-header-title">Catálogo de Productos</div>
+            <div class="table-header-sub" id="table-count-label">Cargando...</div>
+          </div>
+          <div class="table-actions">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c6585" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="search-input" placeholder="Buscar producto..." />
+            </div>
+            <button class="btn-action secondary" id="btn-refresh">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Recargar
+            </button>
+            <button class="btn-action primary" id="btn-nuevo-producto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b0e17" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuevo producto
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="products-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Código de barras</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /dashboard -->
+
+<!-- ─── MODALS ─── -->
+
+<!-- Nuevo / Editar producto -->
+<div class="modal-backdrop" id="modal-producto">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-producto-title">Nuevo Producto</div>
+      <button class="modal-close" data-close="modal-producto">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-error" id="modal-producto-error"></div>
+    <div class="modal-form-group">
+      <label class="modal-label">Código de barras</label>
+      <input type="text" class="modal-input" id="input-barras" placeholder="Ej: 7701234567890" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">Descripción</label>
+      <input type="text" class="modal-input" id="input-desc" placeholder="Nombre del producto" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">Precio (COP)</label>
+      <input type="number" class="modal-input" id="input-precio" placeholder="Ej: 2500.50" min="0" step="0.01" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">Stock inicial</label>
+      <input type="number" class="modal-input" id="input-stock" placeholder="Ej: 50" min="0" step="1" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">ID Categoría</label>
+      <input type="number" class="modal-input" id="input-categoria" placeholder="Ej: 1" min="1" step="1" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action secondary" data-close="modal-producto">Cancelar</button>
+      <button class="btn-action primary" id="btn-guardar-producto">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Actualizar precio -->
+<div class="modal-backdrop" id="modal-precio">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">
+      <div class="modal-title">Actualizar Precio</div>
+      <button class="modal-close" data-close="modal-precio">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-error" id="modal-precio-error"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;" id="modal-precio-desc">—</p>
+    <div class="modal-form-group">
+      <label class="modal-label">Nuevo precio (COP)</label>
+      <input type="number" class="modal-input" id="input-nuevo-precio" placeholder="Ej: 3000.00" min="0" step="0.01" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action secondary" data-close="modal-precio">Cancelar</button>
+      <button class="btn-action primary" id="btn-guardar-precio">Actualizar precio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ingresar mercancía -->
+<div class="modal-backdrop" id="modal-ingreso">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">
+      <div class="modal-title">Ingresar Mercancía</div>
+      <button class="modal-close" data-close="modal-ingreso">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-error" id="modal-ingreso-error"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;" id="modal-ingreso-desc">—</p>
+    <div class="modal-form-group">
+      <label class="modal-label">Cantidad a ingresar</label>
+      <input type="number" class="modal-input" id="input-cantidad-ingreso" placeholder="Ej: 24" min="1" step="1" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action secondary" data-close="modal-ingreso">Cancelar</button>
+      <button class="btn-action primary" id="btn-confirmar-ingreso" style="background:linear-gradient(135deg,#1a5fa8,#3b82f6);color:#fff;">
+        Registrar ingreso
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div class="modal-backdrop" id="modal-confirm-delete">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </div>
+    <div class="confirm-title">Eliminar producto</div>
+    <div class="confirm-msg" id="confirm-delete-msg">¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.</div>
+    <div class="confirm-footer">
+      <button class="btn-action secondary" data-close="modal-confirm-delete">Cancelar</button>
+      <button class="btn-action" id="btn-confirm-delete" style="background:var(--danger);color:#fff;">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ─── SCRIPT ─── -->
+<script src="dashboard.js"></script>
+
+</body>
+</html>
