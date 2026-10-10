@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from passlib.context import CryptContext
@@ -9,37 +10,70 @@ models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(docs_url="/api/docs", openapi_url="/api/openapi.json")
 
+# Configurar CORS para permitir peticiones desde el frontend local
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # En producción restringe esto al dominio de tu frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Configuración para encriptar contraseñas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Esquema de Pydantic para recibir los datos del frontend
-class UserCreate(BaseModel):
+# Esquema de Pydantic para el registro
+class EmpresaCreate(BaseModel):
+    razon_social: str
+    nit: str
+    nombres_admin: str
+    apellidos_admin: str
     email: str
     password: str
 
+# Esquema de Pydantic para el login
+class EmpresaLogin(BaseModel):
+    nit: str
+    password: str
+
 @app.post("/api/register")
-def register(user: UserCreate, db: Session = Depends(database.get_db)):
-    # 1. Verificar si el usuario ya existe
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
-    if db_user:
+def register(empresa: EmpresaCreate, db: Session = Depends(database.get_db)):
+    # 1. Verificar si la empresa ya existe (por NIT o Email)
+    db_empresa_nit = db.query(models.Empresa).filter(models.Empresa.nit == empresa.nit).first()
+    if db_empresa_nit:
+        raise HTTPException(status_code=400, detail="El NIT ya está registrado")
+        
+    db_empresa_email = db.query(models.Empresa).filter(models.Empresa.email == empresa.email).first()
+    if db_empresa_email:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
     
     # 2. Encriptar contraseña y guardar
-    hashed_pwd = pwd_context.hash(user.password)
-    new_user = models.User(email=user.email, hashed_password=hashed_pwd)
-    db.add(new_user)
+    hashed_pwd = pwd_context.hash(empresa.password)
+    new_empresa = models.Empresa(
+        razon_social=empresa.razon_social,
+        nit=empresa.nit,
+        nombres_admin=empresa.nombres_admin,
+        apellidos_admin=empresa.apellidos_admin,
+        email=empresa.email,
+        hashed_password=hashed_pwd
+    )
+    db.add(new_empresa)
     db.commit()
-    return {"message": "Usuario registrado exitosamente"}
+    return {"message": "Empresa registrada exitosamente"}
 
 @app.post("/api/login")
-def login(user: UserCreate, db: Session = Depends(database.get_db)):
-    # 1. Buscar al usuario
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
-    if not db_user:
-        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+def login(empresa: EmpresaLogin, db: Session = Depends(database.get_db)):
+    # 1. Buscar a la empresa por NIT
+    db_empresa = db.query(models.Empresa).filter(models.Empresa.nit == empresa.nit).first()
+    if not db_empresa:
+        raise HTTPException(status_code=400, detail="Credenciales incorrectas (NIT no encontrado)")
     
     # 2. Verificar contraseña
-    if not pwd_context.verify(user.password, db_user.hashed_password):
-        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+    if not pwd_context.verify(empresa.password, db_empresa.hashed_password):
+        raise HTTPException(status_code=400, detail="Credenciales incorrectas (contraseña inválida)")
     
-    return {"message": "Login exitoso", "software_download_url": "URL_DEL_SOFTWARE_AQUI"}
+    return {
+        "message": "Login exitoso", 
+        "nombre_empresa": db_empresa.razon_social,
+        "software_download_url": "URL_DEL_SOFTWARE_AQUI"
+    }
