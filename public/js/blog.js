@@ -1,4 +1,4 @@
-// Reading progress bar
+
 const bar = document.getElementById('progress-bar');
 window.addEventListener('scroll', () => {
   const total = document.body.scrollHeight - window.innerHeight;
@@ -6,13 +6,13 @@ window.addEventListener('scroll', () => {
   bar.style.width = Math.min(pct, 100) + '%';
 });
 
-// Scroll fade-up
+
 const obs = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
 document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
 
-// Nav shadow on scroll
+
 window.addEventListener('scroll', () => {
   document.getElementById('navbar').style.boxShadow =
     window.scrollY > 20 ? '0 2px 20px rgba(15,17,23,0.08)' : 'none';
@@ -29,7 +29,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Share copy link
 document.querySelectorAll('.share-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     if (btn.title === 'Copiar enlace') {

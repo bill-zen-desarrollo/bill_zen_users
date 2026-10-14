@@ -20,8 +20,11 @@ window.addEventListener('scroll', () => {
     }
   });
   // Nav shadow on scroll
-  document.getElementById('navbar').style.boxShadow =
-    window.scrollY > 20 ? '0 2px 20px rgba(15,17,23,0.08)' : 'none';
+  const navbar = document.getElementById('navbar');
+  if (navbar) {
+    navbar.style.boxShadow =
+      window.scrollY > 20 ? '0 2px 20px rgba(15,17,23,0.08)' : 'none';
+  }
 });
 
 // Period buttons (pricing toggle demo)
@@ -38,25 +41,27 @@ function handleSubmit(btn) {
   btn.textContent = 'Enviando...';
   btn.disabled = true;
   setTimeout(() => {
-    btn.textContent = 'Solicitud enviada con exito';
+    btn.textContent = 'Solicitud enviada con éxito';
     btn.style.background = '#085e45';
   }, 1200);
 }
 
 // Hamburger (mobile)
 const hamburger = document.getElementById('hamburger');
-hamburger.addEventListener('click', () => {
-  document.querySelector('.nav-links').classList.toggle('open');
-});
+if (hamburger) {
+  hamburger.addEventListener('click', () => {
+    document.querySelector('.nav-links').classList.toggle('open');
+  });
+}
 document.addEventListener('click', (e) => {
   if (!e.target.closest('nav')) {
-    document.querySelector('.nav-links').classList.remove('open');
+    const nl = document.querySelector('.nav-links');
+    if (nl) nl.classList.remove('open');
   }
 });
 
-
 // ==========================================================
-// DESCARGAS — lógica simple para la nueva sección
+// DESCARGAS
 // ==========================================================
 (function initDownloads() {
   const section = document.getElementById('descargar');
@@ -64,29 +69,25 @@ document.addEventListener('click', (e) => {
 
   const baseUrl = 'https://github.com/JuanCaRojas-18/JuanCaRojas-18.github.io/releases/latest/download/';
   
-  // Asignar URLs reales
   const btnWindows = document.getElementById('dl-btn-windows');
   const btnAndroid = document.getElementById('dl-btn-android');
   
   function handleDownloadClick(e, file) {
-    // Verificar si el usuario ha iniciado sesión o se ha registrado
     const token = sessionStorage.getItem('bz_empresa_token') || sessionStorage.getItem('bz_empresa_nit');
     
     if (!token) {
-      // Si no hay sesión, evitar descarga y llevar al registro
       e.preventDefault();
-      window.location.href = '../login.html#register';
+      window.location.href = 'login.html#register';
     } else {
-      // Si ya está registrado/logueado, iniciar la descarga real
       e.preventDefault();
       window.location.href = baseUrl + file;
     }
   }
 
-  if(btnWindows) {
+  if (btnWindows) {
     btnWindows.addEventListener('click', (e) => handleDownloadClick(e, 'billzenERP.exe'));
   }
-  if(btnAndroid) {
+  if (btnAndroid) {
     btnAndroid.addEventListener('click', (e) => handleDownloadClick(e, 'billzenERP.apk'));
   }
 })();

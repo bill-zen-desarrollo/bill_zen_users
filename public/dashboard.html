@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billzen — Panel de Inventario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     DASHBOARD (acceso directo tras login de empresa)
+═══════════════════════════════════════════ -->
+<div id="dashboard" style="display:flex;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-mark">
+        <svg viewBox="0 0 18 18" fill="none" width="16" height="16">
+          <rect x="2" y="2" width="6" height="6" rx="1.5" fill="white"/>
+          <rect x="10" y="2" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+          <rect x="2" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+          <rect x="10" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-name">Bill<em>zen</em></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Módulos</div>
+
+      <button class="nav-item active" data-module="inventario">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        Inventario
+      </button>
+
+      <div class="sidebar-section-label" style="margin-top:8px;">Próximamente</div>
+
+      <button class="nav-item" disabled style="opacity:0.4;cursor:not-allowed;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        Facturación
+      </button>
+
+      <button class="nav-item" disabled style="opacity:0.4;cursor:not-allowed;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Contactos
+      </button>
+
+      <button class="nav-item" disabled style="opacity:0.4;cursor:not-allowed;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+          <polyline points="2 20 22 20"/>
+        </svg>
+        Finanzas
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">--</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-username">Empresa</div>
+          <div class="sidebar-user-role" id="sidebar-userrole">Sesión activa</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="btn-logout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Módulo de Inventario</div>
+        <div class="topbar-subtitle">Gestión de productos y stock en tiempo real</div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge-nit" id="topbar-nit">NIT —</span>
+        <button class="btn-action secondary" id="btn-refresh-top" title="Recargar catálogo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Actualizar
+        </button>
+      </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+
+      <!-- KPIs -->
+      <div class="kpi-row" id="kpi-row">
+        <div class="kpi-card green">
+          <div class="kpi-icon green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4AE8A4" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="kpi-label">Total Productos</div>
+          <div class="kpi-value" id="kpi-total">—</div>
+          <div class="kpi-meta">En catálogo</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-icon blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div class="kpi-label">Stock Total</div>
+          <div class="kpi-value" id="kpi-stock">—</div>
+          <div class="kpi-meta">Unidades</div>
+        </div>
+        <div class="kpi-card warn">
+          <div class="kpi-icon warn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="kpi-label">Stock Bajo</div>
+          <div class="kpi-value" id="kpi-low">—</div>
+          <div class="kpi-meta">&lt; 10 unidades</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-icon purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="kpi-label">Valor Inventario</div>
+          <div class="kpi-value" id="kpi-valor">—</div>
+          <div class="kpi-meta">COP estimado</div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-header-left">
+            <div class="table-header-title">Catálogo de Productos</div>
+            <div class="table-header-sub" id="table-count-label">Cargando...</div>
+          </div>
+          <div class="table-actions">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5c6585" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="search-input" placeholder="Buscar producto..." />
+            </div>
+            <button class="btn-action secondary" id="btn-refresh">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              Recargar
+            </button>
+            <button class="btn-action primary" id="btn-nuevo-producto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b0e17" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuevo producto
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="products-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Código de barras</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /dashboard -->
+
+<!-- ─── MODALS ─── -->
+
+<!-- Nuevo / Editar producto -->
+<div class="modal-backdrop" id="modal-producto">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-producto-title">Nuevo Producto</div>
+      <button class="modal-close" data-close="modal-producto">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-error" id="modal-producto-error"></div>
+    <div class="modal-form-group">
+      <label class="modal-label">Código de barras</label>
+      <input type="text" class="modal-input" id="input-barras" placeholder="Ej: 7701234567890" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">Descripción</label>
+      <input type="text" class="modal-input" id="input-desc" placeholder="Nombre del producto" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">Precio (COP)</label>
+      <input type="number" class="modal-input" id="input-precio" placeholder="Ej: 2500.50" min="0" step="0.01" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">Stock inicial</label>
+      <input type="number" class="modal-input" id="input-stock" placeholder="Ej: 50" min="0" step="1" />
+    </div>
+    <div class="modal-form-group">
+      <label class="modal-label">ID Categoría</label>
+      <input type="number" class="modal-input" id="input-categoria" placeholder="Ej: 1" min="1" step="1" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action secondary" data-close="modal-producto">Cancelar</button>
+      <button class="btn-action primary" id="btn-guardar-producto">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Actualizar precio -->
+<div class="modal-backdrop" id="modal-precio">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">
+      <div class="modal-title">Actualizar Precio</div>
+      <button class="modal-close" data-close="modal-precio">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-error" id="modal-precio-error"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;" id="modal-precio-desc">—</p>
+    <div class="modal-form-group">
+      <label class="modal-label">Nuevo precio (COP)</label>
+      <input type="number" class="modal-input" id="input-nuevo-precio" placeholder="Ej: 3000.00" min="0" step="0.01" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action secondary" data-close="modal-precio">Cancelar</button>
+      <button class="btn-action primary" id="btn-guardar-precio">Actualizar precio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ingresar mercancía -->
+<div class="modal-backdrop" id="modal-ingreso">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-header">
+      <div class="modal-title">Ingresar Mercancía</div>
+      <button class="modal-close" data-close="modal-ingreso">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+    </div>
+    <div class="modal-error" id="modal-ingreso-error"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;" id="modal-ingreso-desc">—</p>
+    <div class="modal-form-group">
+      <label class="modal-label">Cantidad a ingresar</label>
+      <input type="number" class="modal-input" id="input-cantidad-ingreso" placeholder="Ej: 24" min="1" step="1" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action secondary" data-close="modal-ingreso">Cancelar</button>
+      <button class="btn-action primary" id="btn-confirmar-ingreso" style="background:linear-gradient(135deg,#1a5fa8,#3b82f6);color:#fff;">
+        Registrar ingreso
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div class="modal-backdrop" id="modal-confirm-delete">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+    </div>
+    <div class="confirm-title">Eliminar producto</div>
+    <div class="confirm-msg" id="confirm-delete-msg">¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.</div>
+    <div class="confirm-footer">
+      <button class="btn-action secondary" data-close="modal-confirm-delete">Cancelar</button>
+      <button class="btn-action" id="btn-confirm-delete" style="background:var(--danger);color:#fff;">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ─── SCRIPTS ─── -->
+<script src="js/config.js"></script>
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>

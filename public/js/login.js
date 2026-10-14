@@ -1,7 +1,8 @@
 // ==========================================
 // CONFIGURACIÓN DE RED
 // ==========================================
-const API_BASE_URL = 'http://127.0.0.1:8000/api'; // Cambia esto por la URL de producción o Ngrok cuando sea necesario
+// Utiliza la constante API_BASE_URL provista por js/config.js
+const API_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://127.0.0.1:8000/api';
 
 /* ---- Tab switching ---- */
 function switchTab(tab) {
@@ -66,7 +67,7 @@ async function handleLogin(e) {
     btn.innerHTML = '<div class="spinner"></div> Conectando...';
 
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -89,8 +90,8 @@ async function handleLogin(e) {
         btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Acceso concedido';
         
         setTimeout(() => {
-          // Redirigir al dashboard o donde corresponda
-          window.location.href = 'Intranet_Cliente/dashboard.html'; 
+          // Redirigir al dashboard
+          window.location.href = 'dashboard.html'; 
         }, 900);
 
       } else {
@@ -156,7 +157,7 @@ async function handleRegister(e) {
   btn.innerHTML = '<div class="spinner"></div> Registrando...';
 
   try {
-    const response = await fetch(`${API_BASE_URL}/register`, {
+    const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

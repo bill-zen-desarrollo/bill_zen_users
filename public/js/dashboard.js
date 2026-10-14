@@ -1,15 +1,13 @@
 /**
  * BillZen Dashboard — dashboard.js
- * El usuario ya se autenticó como empresa en login.html.
- * Aquí se restaura la sesión y se carga el inventario directamente.
- *
- * Servidor: http://172.20.10.8:8000
+ * Restaura la sesión de la empresa y gestiona el inventario.
+ * Utiliza API_BASE_URL definido en config.js.
  */
 
-// ─── Configuración ───────────────────────────────────────────────
-const API = 'http://172.20.10.8:8000';
+// ─── Configuración API ───
+const API = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '/api';
 
-// ─── Estado global ───────────────────────────────────────────────
+// ─── Estado global ────
 const state = {
   nit:    '',
   token:  null,
@@ -27,7 +25,7 @@ const state = {
 
   if (!nit) {
     // Sin sesión → redirigir al login
-    window.location.href = '../login.html';
+    window.location.href = 'login.html';
     return;
   }
 
@@ -58,7 +56,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   sessionStorage.removeItem('bz_empresa_nit');
   sessionStorage.removeItem('bz_empresa_token');
   sessionStorage.removeItem('bz_empresa_nombre');
-  window.location.href = '../login.html';
+  window.location.href = 'login.html';
 });
 
 // ═══════════════════════════════════════════════════════════════════
