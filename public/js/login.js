@@ -14,7 +14,7 @@ function switchTab(tab) {
   if (tab === 'login') {
     hint.innerHTML = '¿No tienes cuenta? <a href="#" onclick="switchTab(\'register\');return false;" id="switch-link">Regístrate gratis</a>';
   } else {
-    hint.innerHTML = '¿Ya tienes cuenta? <a href="#" onclick="switchTab(\'login\');return false;" id="switch-link">Inicia sesión</a>';
+    hint.innerHTML = '';
   }
   const card = document.getElementById('auth-card');
   card.style.animation = 'none';
