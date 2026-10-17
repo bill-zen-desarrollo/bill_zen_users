@@ -162,6 +162,7 @@ nav {
   background: rgba(220, 38, 38, 0.08);
   color: #b91c1c;
   border-color: rgba(220, 38, 38, 0.4);
+}
 .btn {
   display: inline-flex;
   align-items: center;
