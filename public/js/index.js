@@ -61,6 +61,96 @@ document.addEventListener('click', (e) => {
 });
 
 // ==========================================================
+// AUTENTICACIÓN & VISTA DE CLIENTE EN NAVBAR
+// ==========================================================
+function getInitials(name, nit) {
+  if (name && typeof name === 'string' && name.trim()) {
+    const words = name.trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.trim().substring(0, 2).toUpperCase();
+  }
+  if (nit && typeof nit === 'string') {
+    return nit.trim().substring(0, 2).toUpperCase();
+  }
+  return 'CL';
+}
+
+function initAuth() {
+  const nit = sessionStorage.getItem('bz_empresa_nit') || localStorage.getItem('bz_empresa_nit');
+  const nombre = sessionStorage.getItem('bz_empresa_nombre') || localStorage.getItem('bz_empresa_nombre');
+
+  const ctaGuest = document.getElementById('nav-cta-guest');
+  const ctaUser = document.getElementById('nav-cta-user');
+  const mobileGuest = document.getElementById('mobile-auth-guest');
+  const mobileUser = document.getElementById('mobile-auth-user');
+
+  if (nit) {
+    const initials = getInitials(nombre, nit);
+    const displayName = nombre || `Empresa ${nit}`;
+    const displayNit = `NIT ${nit}`;
+
+    // Vista Desktop
+    if (ctaGuest) ctaGuest.style.display = 'none';
+    if (ctaUser) {
+      ctaUser.style.display = 'flex';
+      const elAvatar = document.getElementById('nav-user-avatar');
+      const elName = document.getElementById('nav-user-name');
+      const elNit = document.getElementById('nav-user-nit');
+      if (elAvatar) elAvatar.textContent = initials;
+      if (elName) {
+        elName.textContent = displayName;
+        elName.title = displayName;
+      }
+      if (elNit) elNit.textContent = displayNit;
+    }
+
+    // Vista Mobile
+    if (mobileGuest) mobileGuest.style.display = 'none';
+    if (mobileUser) {
+      mobileUser.style.display = 'block';
+      const mAvatar = document.getElementById('mobile-user-avatar');
+      const mName = document.getElementById('mobile-user-name');
+      const mNit = document.getElementById('mobile-user-nit');
+      if (mAvatar) mAvatar.textContent = initials;
+      if (mName) mName.textContent = displayName;
+      if (mNit) mNit.textContent = displayNit;
+    }
+  } else {
+    // Vista Invitado
+    if (ctaGuest) ctaGuest.style.display = 'flex';
+    if (ctaUser) ctaUser.style.display = 'none';
+    if (mobileGuest) mobileGuest.style.display = 'block';
+    if (mobileUser) mobileUser.style.display = 'none';
+  }
+}
+
+function handleLogout() {
+  sessionStorage.removeItem('bz_empresa_nit');
+  sessionStorage.removeItem('bz_empresa_nombre');
+  sessionStorage.removeItem('bz_empresa_token');
+  localStorage.removeItem('bz_empresa_nit');
+  localStorage.removeItem('bz_empresa_nombre');
+  localStorage.removeItem('bz_empresa_token');
+
+  initAuth();
+}
+
+// Listeners para cerrar sesión
+const btnLogout = document.getElementById('nav-btn-logout');
+if (btnLogout) {
+  btnLogout.addEventListener('click', handleLogout);
+}
+const mobileBtnLogout = document.getElementById('mobile-btn-logout');
+if (mobileBtnLogout) {
+  mobileBtnLogout.addEventListener('click', handleLogout);
+}
+
+// Inicializar estado de autenticación al cargar
+initAuth();
+
+// ==========================================================
 // DESCARGAS
 // ==========================================================
 (function initDownloads() {
@@ -73,11 +163,12 @@ document.addEventListener('click', (e) => {
   const btnAndroid = document.getElementById('dl-btn-android');
   
   function handleDownloadClick(e, file) {
-    const token = sessionStorage.getItem('bz_empresa_token') || sessionStorage.getItem('bz_empresa_nit');
+    const nit = sessionStorage.getItem('bz_empresa_nit') || localStorage.getItem('bz_empresa_nit') || sessionStorage.getItem('bz_empresa_token');
     
-    if (!token) {
+    if (!nit) {
       e.preventDefault();
-      window.location.href = 'login.html#register';
+      // Redirigir al registro/login con parámetro de retorno a descargas
+      window.location.href = 'login.html?redirect=descargar#register';
     } else {
       e.preventDefault();
       window.location.href = baseUrl + file;

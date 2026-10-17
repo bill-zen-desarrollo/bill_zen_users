@@ -80,19 +80,22 @@ async function handleLogin(e) {
 
       if (response.ok) {
         const data = await response.json();
+        const nitVal = nitInput.value.trim();
+        const nombreVal = data.nombre_empresa || `NIT ${nitVal}`;
         
-        sessionStorage.setItem('bz_empresa_nit', nitInput.value.trim());
-        if (data.nombre_empresa) {
-          sessionStorage.setItem('bz_empresa_nombre', data.nombre_empresa);
-        }
+        sessionStorage.setItem('bz_empresa_nit', nitVal);
+        sessionStorage.setItem('bz_empresa_nombre', nombreVal);
+        localStorage.setItem('bz_empresa_nit', nitVal);
+        localStorage.setItem('bz_empresa_nombre', nombreVal);
         
         btn.style.background = '#059669';
         btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Acceso concedido';
         
         setTimeout(() => {
-          // Redirigir al dashboard
-          window.location.href = 'dashboard.html'; 
-        }, 900);
+          const urlParams = new URLSearchParams(window.location.search);
+          const target = urlParams.get('redirect') === 'descargar' ? '#descargar' : '';
+          window.location.href = `index.html${target}`; 
+        }, 800);
 
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -173,9 +176,46 @@ async function handleRegister(e) {
     });
 
     if (response.ok) {
-      alert("Registro exitoso. Ahora puedes iniciar sesión.");
+      btn.style.background = '#059669';
+      btn.innerHTML = '<div class="spinner"></div> Conectando...';
+
+      // Intentar inicio de sesión automático tras registro
+      try {
+        const loginRes = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nit: nitInput.value.trim(),
+            password: pwInput.value
+          })
+        });
+
+        if (loginRes.ok) {
+          const loginData = await loginRes.json();
+          const nitVal = nitInput.value.trim();
+          const nombreVal = loginData.nombre_empresa || razonSocialInput.value.trim() || `NIT ${nitVal}`;
+
+          sessionStorage.setItem('bz_empresa_nit', nitVal);
+          sessionStorage.setItem('bz_empresa_nombre', nombreVal);
+          localStorage.setItem('bz_empresa_nit', nitVal);
+          localStorage.setItem('bz_empresa_nombre', nombreVal);
+
+          btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ¡Registro exitoso!';
+
+          setTimeout(() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const target = urlParams.get('redirect') === 'descargar' ? '#descargar' : '';
+            window.location.href = `index.html${target}`;
+          }, 800);
+          return;
+        }
+      } catch (autoErr) {
+        console.warn('Auto-login post-registro no pudo completarse:', autoErr);
+      }
+
+      // Si falla el auto-login por alguna anomalía de red, fallback a pestaña de login
+      alert("Registro exitoso. Por favor ingresa tu contraseña para iniciar sesión.");
       switchTab('login');
-      // Llenar el campo de NIT del login para comodidad
       document.getElementById('lg-email').value = nitInput.value.trim();
       document.getElementById('rg-form').reset();
     } else {
