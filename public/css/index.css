@@ -989,8 +989,39 @@ footer {
     z-index: 199;
     box-shadow: 0 8px 32px rgba(15,17,23,0.15);
   }
-  .nav-links.open { display: flex; }
-  .nav-cta { display: none !important; }
+  .nav-hide-mobile { display: none !important; }
+  .nav-cta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    margin-right: 10px;
+  }
+  .nav-login-mobile {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .nav-user-chip {
+    padding: 3px 10px 3px 4px;
+    gap: 6px;
+  }
+  .nav-user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+  .nav-user-name {
+    font-size: 12px;
+    max-width: 80px;
+  }
+  .nav-user-nit {
+    display: none;
+  }
+  .btn-logout {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
   .nav-links a {
     font-size: 15px;
     padding: 10px 0;
