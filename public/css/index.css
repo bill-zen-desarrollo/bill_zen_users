@@ -162,10 +162,6 @@ nav {
   background: rgba(220, 38, 38, 0.08);
   color: #b91c1c;
   border-color: rgba(220, 38, 38, 0.4);
-}
-.mobile-auth-item {
-  display: none;
-}
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1000,23 +996,6 @@ footer {
     border-bottom: 1px solid var(--border);
   }
   .nav-links li:last-child a { border-bottom: none; }
-  .mobile-auth-item {
-    display: block;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-  }
-  .mobile-user-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    padding: 12px;
-  }
-  .mobile-user-details {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
 
   /* Hero */
   .hero { padding: calc(var(--nav-h) + 40px) 5vw 48px; min-height: auto; }

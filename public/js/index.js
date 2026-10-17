@@ -83,15 +83,13 @@ function initAuth() {
 
   const ctaGuest = document.getElementById('nav-cta-guest');
   const ctaUser = document.getElementById('nav-cta-user');
-  const mobileGuest = document.getElementById('mobile-auth-guest');
-  const mobileUser = document.getElementById('mobile-auth-user');
 
   if (nit) {
     const initials = getInitials(nombre, nit);
     const displayName = nombre || `Empresa ${nit}`;
     const displayNit = `NIT ${nit}`;
 
-    // Vista Desktop
+    // Vista de cliente autenticado
     if (ctaGuest) ctaGuest.style.display = 'none';
     if (ctaUser) {
       ctaUser.style.display = 'flex';
@@ -105,24 +103,10 @@ function initAuth() {
       }
       if (elNit) elNit.textContent = displayNit;
     }
-
-    // Vista Mobile
-    if (mobileGuest) mobileGuest.style.display = 'none';
-    if (mobileUser) {
-      mobileUser.style.display = 'block';
-      const mAvatar = document.getElementById('mobile-user-avatar');
-      const mName = document.getElementById('mobile-user-name');
-      const mNit = document.getElementById('mobile-user-nit');
-      if (mAvatar) mAvatar.textContent = initials;
-      if (mName) mName.textContent = displayName;
-      if (mNit) mNit.textContent = displayNit;
-    }
   } else {
-    // Vista Invitado
+    // Vista de visitante no autenticado
     if (ctaGuest) ctaGuest.style.display = 'flex';
     if (ctaUser) ctaUser.style.display = 'none';
-    if (mobileGuest) mobileGuest.style.display = 'block';
-    if (mobileUser) mobileUser.style.display = 'none';
   }
 }
 
@@ -137,14 +121,10 @@ function handleLogout() {
   initAuth();
 }
 
-// Listeners para cerrar sesión
+// Listener para cerrar sesión
 const btnLogout = document.getElementById('nav-btn-logout');
 if (btnLogout) {
   btnLogout.addEventListener('click', handleLogout);
-}
-const mobileBtnLogout = document.getElementById('mobile-btn-logout');
-if (mobileBtnLogout) {
-  mobileBtnLogout.addEventListener('click', handleLogout);
 }
 
 // Inicializar estado de autenticación al cargar
