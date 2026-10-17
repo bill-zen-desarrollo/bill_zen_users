@@ -148,10 +148,9 @@ async function handleRegister(e) {
   const emailInput = document.getElementById('rg-em');
   const pwInput = document.getElementById('rg-pw');
   const btn = document.getElementById('rg-btn');
-  const termsCheckbox = document.getElementById('rg-terms');
 
-  if (!emailInput.value.trim() || !pwInput.value || !nitInput.value.trim() || !termsCheckbox.checked) {
-    alert("Por favor completa los campos requeridos y acepta los términos.");
+  if (!emailInput.value.trim() || !pwInput.value || !nitInput.value.trim()) {
+    alert("Por favor completa los campos requeridos.");
     return;
   }
 
