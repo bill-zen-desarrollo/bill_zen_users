@@ -94,7 +94,7 @@ async function handleLogin(e) {
         showModal({
           type: 'success',
           title: 'Inicio de sesión exitoso',
-          message: `Bienvenido, ${nombreVal}. Te estamos redirigiendo.`,
+          message: `Bienvenido, ${nombreCorto(nombreVal)}. Te estamos redirigiendo.`,
           confirmText: 'Continuar',
           autoCloseMs: 1800,
           onClose: () => {
@@ -147,6 +147,18 @@ async function handleLogin(e) {
 /* ---- Manejadores de interfaz adicionales ---- */
 function setErr(grpId) { document.getElementById(grpId).classList.add('has-err'); }
 function clearErr(grpId) { document.getElementById(grpId).classList.remove('has-err'); }
+
+/* ---- Nombre corto de empresa ----
+   La BD solo guarda la razón social (ej. "Somos Uno S.A.S."). Para saludar al usuario
+   se quita la forma jurídica final (S.A.S., S.A., LTDA, E.U., S. en C., S.C.A., Y CIA)
+   y se deja solo el nombre de la empresa. Si el resultado quedara vacío, se conserva el original. */
+function nombreCorto(razonSocial) {
+  const original = (razonSocial || '').trim();
+  const corto = original
+    .replace(/[\s,]+(S\.?\s?A\.?\s?S\.?|S\.?\s?C\.?\s?A\.?|S\.?\s?A\.?|LTDA\.?|LIMITADA|E\.?\s?U\.?|S\.?\s?EN\s?C\.?|Y\s?CIA\.?(\s?S\.?\s?C\.?)?)\s*$/i, '')
+    .trim();
+  return corto || original;
+}
 
 /* ---- Modal de información (reemplaza alert() nativo) ----
    type: 'success' | 'error' | 'warning' | 'info'
@@ -311,7 +323,7 @@ async function handleRegister(e) {
           showModal({
             type: 'success',
             title: 'Registro exitoso',
-            message: `Tu cuenta para ${nombreVal} fue creada correctamente. Te estamos redirigiendo.`,
+            message: `Tu cuenta para ${nombreCorto(nombreVal)} fue creada correctamente. Te estamos redirigiendo.`,
             confirmText: 'Continuar',
             autoCloseMs: 2200,
             onClose: redirectAfterRegister
