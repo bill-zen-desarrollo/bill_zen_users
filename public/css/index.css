@@ -67,12 +67,11 @@ nav {
 }
 .nav-logo-mark {
   width: 34px; height: 34px;
-  background: var(--accent);
   border-radius: 9px;
   display: grid;
   place-items: center;
 }
-.nav-logo-mark svg { width: 18px; height: 18px; }
+.nav-logo-mark img { width: 100%; height: 100%; display: block; }
 .nav-logo-name {
   font-family: var(--font-display);
   font-size: 22px;
@@ -82,7 +81,8 @@ nav {
 }
 .nav-logo-name em {
   font-style: italic;
-  color: var(--accent);
+  font-weight: 300;
+  background:linear-gradient(135deg,#f5dc92 0%,#d4a94c 40%,#a47a2c 70%,#e9c873 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#c9a24a;padding-right:.06em;
 }
 .nav-links {
   display: flex;
@@ -955,9 +955,10 @@ footer {
 .footer-logo-name {
   font-family: var(--font-display);
   font-size: 20px;
-  font-style: italic;
+  font-weight: 600;
   color: #fff;
 }
+.footer-logo-name em { font-style: italic; font-weight: 300; background:linear-gradient(135deg,#f5dc92 0%,#d4a94c 40%,#a47a2c 70%,#e9c873 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#c9a24a;padding-right:.06em; }
 .footer-tagline { font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1.6; max-width: 220px; font-weight: 300; }
 .footer-socials { display: flex; gap: 10px; margin-top: 20px; }
 .social-btn {
