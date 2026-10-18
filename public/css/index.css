@@ -592,12 +592,24 @@ section { padding: 96px 5vw; }
 }
 .feat-card:hover::after { transform: scaleX(1); }
 .feat-icon {
-  width: 44px; height: 44px;
-  border-radius: 11px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  margin-bottom: 18px;
-  font-size: 20px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgba(15, 17, 23, 0.04);
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.feat-card:hover .feat-icon {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(10, 111, 82, 0.25);
 }
 .feat-title {
   font-size: 16px;
