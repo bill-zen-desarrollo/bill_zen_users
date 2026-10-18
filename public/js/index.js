@@ -48,9 +48,17 @@ function handleSubmit(btn) {
 
 // Hamburger (mobile)
 const hamburger = document.getElementById('hamburger');
-if (hamburger) {
-  hamburger.addEventListener('click', () => {
-    document.querySelector('.nav-links').classList.toggle('open');
+const navLinksMenu = document.querySelector('.nav-links');
+if (hamburger && navLinksMenu) {
+  hamburger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navLinksMenu.classList.toggle('open');
+  });
+
+  navLinksMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navLinksMenu.classList.remove('open');
+    });
   });
 }
 document.addEventListener('click', (e) => {

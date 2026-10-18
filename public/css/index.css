@@ -989,6 +989,7 @@ footer {
     z-index: 199;
     box-shadow: 0 8px 32px rgba(15,17,23,0.15);
   }
+  .nav-links.open { display: flex !important; }
   .nav-hide-mobile { display: none !important; }
   .nav-cta {
     display: flex;
