@@ -1084,7 +1084,8 @@ footer {
 
   /* Features */
   .features-grid { grid-template-columns: 1fr; gap: 16px; margin-top: 36px; }
-  .features-grid .feat-card { grid-column: auto; }
+  .features-grid .feat-card,
+  .features-grid .feat-card:nth-child(n+4) { grid-column: auto; }
 
   /* How it works */
   .how-grid { grid-template-columns: 1fr; gap: 36px; }
