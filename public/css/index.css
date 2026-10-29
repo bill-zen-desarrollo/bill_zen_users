@@ -988,9 +988,9 @@ footer {
   color: rgba(255,255,255,0.3);
 }
 .dian-badge {
-  background: rgba(74,232,164,0.1);
-  border: 1px solid rgba(74,232,164,0.2);
-  color: #4AE8A4;
+  background: rgba(245, 166, 35, 0.12);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  color: #F5A623;
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 10.5px;
