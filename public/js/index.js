@@ -158,6 +158,9 @@ initAuth();
     btnWindows.addEventListener('click', (e) => handleDownloadClick(e, 'BillZen.exe'));
   }
   if (btnAndroid) {
-    btnAndroid.addEventListener('click', (e) => handleDownloadClick(e, 'billzenERP.apk'));
+    btnAndroid.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'proximamente.html';
+    });
   }
 })();
