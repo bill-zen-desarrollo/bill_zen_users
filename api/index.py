@@ -72,5 +72,5 @@ def login(empresa: EmpresaLogin, db: Session = Depends(database.get_db)):
     return {
         "message": "Login exitoso", 
         "nombre_empresa": db_empresa.razon_social,
-        "software_download_url": "URL_DEL_SOFTWARE_AQUI"
+        "software_download_url": "https://github.com/bill-zen-desarrollo/bill_zen_users/releases/download/1.0/BillZen.exe"
     }
