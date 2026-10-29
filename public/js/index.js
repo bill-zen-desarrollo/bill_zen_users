@@ -36,15 +36,6 @@ document.querySelectorAll('.period-btn').forEach(btn => {
   });
 });
 
-// Form submit
-function handleSubmit(btn) {
-  btn.textContent = 'Enviando...';
-  btn.disabled = true;
-  setTimeout(() => {
-    btn.textContent = 'Solicitud enviada con éxito';
-    btn.style.background = '#085e45';
-  }, 1200);
-}
 
 // Hamburger (mobile)
 const hamburger = document.getElementById('hamburger');
