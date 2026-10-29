@@ -145,7 +145,7 @@ initAuth();
   const section = document.getElementById('descargar');
   if (!section) return;
 
-  const baseUrl = 'https://github.com/JuanCaRojas-18/JuanCaRojas-18.github.io/releases/latest/download/';
+  const baseUrl = 'https://github.com/bill-zen-desarrollo/bill_zen_users/releases/download/1.0/';
   
   const btnWindows = document.getElementById('dl-btn-windows');
   const btnAndroid = document.getElementById('dl-btn-android');
@@ -164,7 +164,7 @@ initAuth();
   }
 
   if (btnWindows) {
-    btnWindows.addEventListener('click', (e) => handleDownloadClick(e, 'billzenERP.exe'));
+    btnWindows.addEventListener('click', (e) => handleDownloadClick(e, 'BillZen.exe'));
   }
   if (btnAndroid) {
     btnAndroid.addEventListener('click', (e) => handleDownloadClick(e, 'billzenERP.apk'));
