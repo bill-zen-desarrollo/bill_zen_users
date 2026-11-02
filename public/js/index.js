@@ -4,7 +4,7 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-// Nav highlight on scroll
+
 const sections = document.querySelectorAll('section[id], .stats-bar');
 const navLinks = document.querySelectorAll('.nav-links a');
 window.addEventListener('scroll', () => {

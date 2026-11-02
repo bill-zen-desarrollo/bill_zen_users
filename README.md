@@ -1,296 +1,213 @@
-# Billzen
+# BillZen — Portal de Usuarios y Distribución
 
 > Sistema contable y de facturación electrónica para MiPyMEs colombianas.
 
-Billzen es una plataforma web que permite a pequeñas y medianas empresas colombianas gestionar su facturación electrónica bajo los lineamientos de la DIAN, junto con módulos de contactos, artículos, gastos y reportes financieros — todo desde una intranet PWA que funciona incluso sin conexión a internet.
+Este repositorio (`bill_zen_users`) aloja la **plataforma web pública, el módulo de autenticación/registro de empresas y el portal de descarga** del software de escritorio **BillZen ERP**, desplegado bajo una arquitectura **Serverless Full-Stack** en **Vercel** con base de datos **PostgreSQL Serverless en Neon.tech**.
 
 ---
 
 ## Tabla de contenidos
 
-- [Descripción general](#descripción-general)
-- [Stack tecnológico](#stack-tecnológico)
-- [Arquitectura](#arquitectura)
-- [Módulos](#módulos)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Cómo correr el proyecto](#cómo-correr-el-proyecto)
-- [Identidad visual](#identidad-visual)
-- [Convenciones de código](#convenciones-de-código)
-- [Cómo contribuir](#cómo-contribuir)
-- [Equipo](#equipo)
+1. [Arquitectura del Sistema](#1-arquitectura-del-sistema)
+2. [Stack Tecnológico](#2-stack-tecnológico)
+3. [Estructura del Proyecto e Identificación de Código](#3-estructura-del-proyecto-e-identificación-de-código)
+4. [Flujo de Usuario y Endpoints de la API](#4-flujo-de-usuario-y-endpoints-de-la-api)
+5. [Configuración y Ejecución Local](#5-configuración-y-ejecución-local)
+6. [Despliegue en Vercel y Neon.tech](#6-despliegue-en-vercel-y-neontech)
+7. [Identidad Visual](#7-identidad-visual)
+8. [Equipo](#8-equipo)
 
 ---
 
-## Descripción general
+## 1. Arquitectura del Sistema
 
-Billzen está compuesto por dos partes principales:
+El proyecto implementa una **Arquitectura Serverless de 3 Capas (Three-Tier Serverless Architecture)** combinada con **JAMstack** para la entrega de activos estáticos:
 
-- **Sitio público** — Página de presentación del producto, desplegada en GitHub Pages.
-- **Intranet** — Aplicación web progresiva (PWA) para uso interno de las empresas registradas. Soporta modo offline mediante Service Worker e IndexedDB, y sincroniza automáticamente cuando se restablece la conexión.
+1. **Capa de Presentación (Frontend Estático — Edge Network en Vercel):**
+   - Servida directamente desde la carpeta `public/` mediante `@vercel/static`.
+   - Construida con HTML5, CSS3 modular y JavaScript Vanilla (ES6+).
+2. **Capa de Lógica de Negocio (Backend Serverless — Vercel Functions):**
+   - Implementada en **Python con FastAPI** dentro de `api/index.py` y ejecutada como una función Serverless (`@vercel/python`).
+   - El enrutador de `vercel.json` intercepta todas las peticiones `/api/(.*)` y las dirige a la instancia de FastAPI, mientras que el resto de rutas `/(.*)` sirven los archivos de `/public/$1`.
+3. **Capa de Datos y Almacenamiento Externo:**
+   - **Base de Datos Relacional:** **PostgreSQL Serverless** alojada en **Neon.tech** (AWS `us-east-1`), conectada mediante un *Connection Pooler* (`pool_pre_ping=True` y `sslmode=require`) a través de SQLAlchemy.
+   - **Distribución de Binarios:** **GitHub Releases** aloja y distribuye el instalador oficial de escritorio (`BillZen.exe`).
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                         Cliente (Navegador)                          │
+│         HTML5 / CSS3 / JS Vanilla (sessionStorage & localStorage)    │
+└───────────────────┬──────────────────────────────────┬───────────────┘
+                    │                                  │
+       1. Peticiones Web y API (/api/*)   3. Descarga Directa (Autenticado)
+                    │                                  │
+                    ▼                                  ▼
+┌───────────────────────────────────────┐  ┌───────────────────────────┐
+│            Vercel Cloud               │  │      GitHub Releases      │
+│                                       │  │                           │
+│  ┌──────────────┐   ┌──────────────┐  │  │  Instalador Escritorio:   │
+│  │ @vercel/     │   │ @vercel/     │  │  │  releases/download/1.0/   │
+│  │ static       │   │ python       │  │  │  BillZen.exe              │
+│  │ (/public/*)  │   │ (FastAPI)    │  │  └───────────────────────────┘
+│  └──────────────┘   └──────┬───────┘  │
+└────────────────────────────┼──────────┘
+                             │ 2. SQLAlchemy ORM + Psycopg2 (SSL Pooler)
+                             ▼
+┌───────────────────────────────────────┐
+│       Neon.tech (Serverless DB)       │
+│     PostgreSQL — Tabla: `empresas`    │
+└───────────────────────────────────────┘
+```
 
 ---
 
-## Stack tecnológico
+## 2. Stack Tecnológico
 
 ### Frontend
-- HTML5 / CSS3 / JavaScript vanilla (sin frameworks)
-- PWA con Service Worker e IndexedDB para soporte offline
-- Fuentes: [Fraunces](https://fonts.google.com/specimen/Fraunces), [Sora](https://fonts.google.com/specimen/Sora), [DM Mono](https://fonts.google.com/specimen/DM+Mono)
-- Despliegue: GitHub Pages
+- **Lenguajes:** HTML5 semántico, CSS3 con variables nativas (Custom Properties), JavaScript Vanilla (ES6+).
+- **Tipografías:** *Fraunces* (Títulos y display), *Sora* (Interfaz y cuerpo), *DM Mono* (NITs, etiquetas técnicas y precios).
+- **Gestión de estado de sesión:** `sessionStorage` y `localStorage` (`bz_empresa_nit`, `bz_empresa_nombre`).
 
-### Backend
-- Python 3.11+
-- [FastAPI](https://fastapi.tiangolo.com/) — framework REST
-- Autenticación con JWT
-- Despliegue: servidor Python (VPS / servicio cloud)
+### Backend (API Serverless)
+- **Lenguaje:** Python 3.11+
+- **Framework:** [FastAPI](https://fastapi.tiangolo.com/)
+- **ORM:** [SQLAlchemy](https://www.sqlalchemy.org/) + `psycopg2-binary`
+- **Seguridad:** Encriptación de contraseñas con `bcrypt` (generación de *salt* y verificación de *hash*).
+- **Validación de Datos:** `Pydantic` (`BaseModel`).
 
-### Base de datos
-- MySQL 8.0 en Azure Database for MySQL
-
----
-
-## Arquitectura
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    Cliente (Browser)                 │
-│                                                     │
-│   ┌───────────────────────────────────────────┐     │
-│   │             PWA — Intranet                │     │
-│   │  HTML / CSS / JS vanilla                  │     │
-│   │  Service Worker  ←→  IndexedDB            │     │
-│   └────────────────────┬──────────────────────┘     │
-└────────────────────────│────────────────────────────┘
-                         │ HTTP / REST (JSON)
-                         ▼
-┌─────────────────────────────────────────────────────┐
-│                 Backend — FastAPI                    │
-│                                                     │
-│   Rutas REST → Servicios → Repositorios             │
-│   Autenticación JWT                                 │
-└────────────────────────┬────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────┐
-│           MySQL 8.0 — Azure Database                │
-└─────────────────────────────────────────────────────┘
-```
-
-### Flujo offline
-
-Cuando no hay conexión a internet, la PWA opera sobre IndexedDB de forma local. Al restaurarse la conexión, el Service Worker detecta el cambio y sincroniza automáticamente los datos pendientes con el backend.
+### Infraestructura y Nube
+- **Hosting & Serverless Functions:** [Vercel](https://vercel.com/)
+- **Base de Datos Cloud:** [Neon.tech](https://neon.tech/) (PostgreSQL Serverless)
+- **Repositorio y Releases:** [GitHub — bill-zen-desarrollo](https://github.com/bill-zen-desarrollo)
 
 ---
 
-## Módulos
-
-Los módulos se desarrollan en el siguiente orden:
-
-| # | Módulo | Estado | Descripción |
-|---|--------|--------|-------------|
-| 1 | Login / Registro | ✅ En desarrollo | Autenticación de empresa y usuario |
-| 2 | Dashboard | 🔜 Pendiente | KPIs principales de la empresa |
-| 3 | Facturación electrónica | 🔜 Pendiente | Emisión de facturas bajo estándar DIAN |
-| 4 | Contactos | 🔜 Pendiente | Gestión de clientes y proveedores |
-| 5 | Artículos | 🔜 Pendiente | Catálogo de productos y servicios |
-| 6 | Gastos | 🔜 Pendiente | Registro y categorización de gastos |
-| 7 | Reportes | 🔜 Pendiente | Informes financieros y exportación |
-| 8 | Configuración | 🔜 Pendiente | Datos de empresa, usuarios y preferencias |
-
----
-
-## Estructura del proyecto
+## 3. Estructura del Proyecto e Identificación de Código
 
 ```
-bill_zen/
+bill_zen_users/
 │
-├── public/                  # Sitio público (GitHub Pages)
-│   ├── index.html
+├── api/                         # Backend Serverless (FastAPI)
+│   ├── database.py              # Conexión a PostgreSQL (Neon.tech) y sesión SQLAlchemy
+│   ├── models.py                # Modelo ORM de la tabla `empresas`
+│   └── index.py                 # Punto de entrada FastAPI y endpoints (/api/register, /api/login)
+│
+├── public/                      # Frontend estático servido por Vercel
+│   ├── index.html               # Landing page principal (Funcionalidades, Planes, Descargas)
+│   ├── login.html               # Vista unificada de Inicio de Sesión y Registro de empresas
+│   ├── blog.html                # Artículo informativo sobre facturación electrónica y PYMEs
+│   ├── proximamente.html        # Página informativa para módulos/planes en desarrollo
+│   │
 │   ├── css/
-│   └── js/
+│   │   ├── index.css            # Estilos globales y de la landing page
+│   │   ├── login.css            # Estilos del módulo de autenticación y modales
+│   │   ├── blog.css             # Estilos de lectura y barra de progreso del blog
+│   │   └── proximamente.css     # Estilos de la tarjeta "Estamos trabajando para ti"
+│   │
+│   ├── js/
+│   │   ├── config.js            # Detección automática de entorno (localhost vs Vercel /api)
+│   │   ├── index.js             # Lógica de landing: sesión en navbar, animaciones y descargas
+│   │   ├── login.js             # Lógica de fetch (/login, /register), validación y modales
+│   │   └── blog.js              # Barra de progreso de lectura y sesión en el blog
+│   │
+│   └── img/
+│       └── logo-mark.svg        # Logotipo vectorial de BillZen
 │
-├── intranet/                # Aplicación PWA
-│   ├── index.html           # Punto de entrada
-│   ├── manifest.json        # Configuración PWA
-│   ├── sw.js                # Service Worker
-│   │
-│   ├── modules/             # Un directorio por módulo
-│   │   ├── login/
-│   │   │   ├── login.html
-│   │   │   ├── login.css
-│   │   │   └── login.js
-│   │   ├── dashboard/
-│   │   ├── facturacion/
-│   │   ├── contactos/
-│   │   ├── articulos/
-│   │   ├── gastos/
-│   │   ├── reportes/
-│   │   └── configuracion/
-│   │
-│   ├── shared/              # Recursos compartidos
-│   │   ├── css/
-│   │   │   └── variables.css    # Tokens de diseño globales
-│   │   ├── js/
-│   │   │   ├── api.js           # Cliente HTTP hacia el backend
-│   │   │   ├── auth.js          # Manejo de JWT
-│   │   │   ├── db.js            # Wrapper de IndexedDB
-│   │   │   └── router.js        # Enrutador SPA
-│   │   └── icons/               # Iconos SVG
-│   │
-│   └── assets/
-│       └── fonts/
-│
-└── backend/                 # Repositorio privado — ver documentación interna
+├── .env                         # Variables de entorno locales (DATABASE_URL de Neon.tech)
+├── requirements.txt             # Dependencias de Python para Vercel
+├── vercel.json                  # Reglas de construcción y enrutamiento en Vercel
+└── README.md                    # Documentación del proyecto
 ```
+
+### Detalle de los archivos clave
+
+#### Backend (`api/`)
+- **`api/database.py`**: Carga la variable `DATABASE_URL` desde el entorno, crea el motor de SQLAlchemy con `pool_pre_ping=True` (esencial para conexiones serverless en Neon que entran en reposo) y provee el generador `get_db()` para inyección de dependencias.
+- **`api/models.py`**: Define el modelo `Empresa` mapeado a la tabla `empresas` en PostgreSQL con las columnas: `id`, `razon_social`, `nit` (único), `nombres_admin`, `apellidos_admin`, `email` (único) y `hashed_password`.
+- **`api/index.py`**: Configura la aplicación FastAPI, el middleware CORS, los esquemas Pydantic (`EmpresaCreate` y `EmpresaLogin`) y los endpoints `POST /api/register` y `POST /api/login`.
+
+#### Frontend (`public/`)
+- **`public/js/config.js`**: Define `API_BASE_URL`. Si detecta que se ejecuta en `localhost` o `127.0.0.1`, apunta a `http://127.0.0.1:8000/api`; si está en producción (Vercel), apunta a la ruta relativa `/api`.
+- **`public/js/login.js`**:
+  - `switchTab(tab)`: Alterna entre las pestañas de *Iniciar sesión* y *Crear cuenta*.
+  - `handleLogin(e)`: Envía `nit` y `password` a `POST /api/login`, guarda la sesión en `sessionStorage`/`localStorage` y redirige a `index.html` (o a `#descargar` si venía desde el botón de descarga).
+  - `handleRegister(e)`: Registra una nueva empresa en `POST /api/register`, realiza auto-login transparente y redirige al usuario.
+- **`public/js/index.js`**:
+  - `initAuth()` y `handleLogout()`: Muestra en la barra de navegación superior el chip con las iniciales, razón social y NIT de la empresa cuando hay sesión activa, o los botones *Iniciar sesión / Registrarse* cuando es visitante.
+  - `initDownloads()`: Verifica si el usuario tiene sesión activa antes de descargar `BillZen.exe` desde GitHub Releases; si no ha iniciado sesión, lo redirige a `login.html?redirect=descargar#register`.
 
 ---
 
-## Cómo correr el proyecto
+## 4. Flujo de Usuario y Endpoints de la API
 
-### Requisitos previos
+### Endpoints disponibles
 
-- Git
-- Navegador moderno (Chrome, Firefox, Edge)
+| Método | Ruta | Cuerpo (JSON) | Respuesta exitosa | Descripción |
+|--------|------|---------------|-------------------|-------------|
+| `POST` | `/api/register` | `{ razon_social, nit, nombres_admin, apellidos_admin, email, password }` | `200 OK` — `{"message": "Empresa registrada exitosamente"}` | Valida que el NIT y el correo no existan, encripta la contraseña con `bcrypt` y crea el registro en Neon.tech. |
+| `POST` | `/api/login` | `{ nit, password }` | `200 OK` — `{"message": "Login exitoso", "nombre_empresa": "...", "software_download_url": "..."}` | Verifica el NIT y compara el hash de la contraseña con `bcrypt.checkpw`. |
 
-### Frontend (sitio público e intranet)
+---
 
-El frontend es HTML/CSS/JS puro — no requiere build. Puedes abrirlo directamente en el navegador o usar un servidor local:
+## 5. Configuración y Ejecución Local
 
+### 1. Clonar el repositorio y crear entorno virtual
 ```bash
-# Opción 1 — Extensión Live Server en VS Code / Antigravity
-# Clic derecho sobre index.html → "Open with Live Server"
-
-# Opción 2 — Python simple server
-cd intranet/
-python -m http.server 3000
-# Abrir http://localhost:3000
+git clone https://github.com/bill-zen-desarrollo/bill_zen_users.git
+cd bill_zen_users
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+pip install uvicorn python-dotenv bcrypt
 ```
 
-### Backend
+### 2. Configurar variables de entorno
+Crear un archivo `.env` en la raíz con la cadena de conexión de Neon.tech:
+```env
+DATABASE_URL="postgresql://usuario:password@host.neon.tech/bill_zen?sslmode=require"
+```
 
-El backend está desarrollado en Python con FastAPI por Camilo Alarcón.
+### 3. Iniciar el servidor Backend (FastAPI)
+```bash
+uvicorn api.index:app --reload --port 8000
+```
+- Documentación interactiva Swagger disponible en: `http://127.0.0.1:8000/api/docs`
 
-Para instrucciones de instalación, configuración y variables de entorno, consultar la documentación interna del equipo.
-
-> Las credenciales y detalles de infraestructura se comparten de forma segura entre los miembros del equipo y no se publican en este repositorio.
-
----
-
-## Identidad visual
-
-### Paleta de colores
-
-| Token | Valor | Uso |
-|-------|-------|-----|
-| `--accent` | `#0a6f52` | Color principal, botones, enlaces |
-| `--accent-dark` | `#075c43` | Hover de elementos accent |
-| `--accent-light` | `#e6f4f0` | Fondos secundarios, badges |
-| `--bg` | `#f5f3ef` | Fondo general de la aplicación |
-| `--dark` | `#0f1117` | Texto principal |
-| `--surface` | `#ffffff` | Tarjetas y paneles |
-| `--muted` | `#6b6b6b` | Texto secundario |
-| `--border` | `#ddd9d1` | Bordes y separadores |
-
-### Tipografía
-
-| Familia | Uso |
-|---------|-----|
-| Fraunces (italic) | Títulos, marca, display |
-| Sora | Cuerpo de texto, UI general |
-| DM Mono | Códigos, NITs, valores numéricos, badges técnicos |
-
-### Reglas de diseño
-
-- **Sin emojis** — se usan exclusivamente iconos SVG inline.
-- Estilo fintech: profesional, limpio, sin efectos decorativos excesivos.
-- Todos los colores se definen como variables CSS en `shared/css/variables.css`.
-- Los iconos SVG se ubican en `shared/icons/` y se referencian por nombre.
+### 4. Abrir el Frontend
+Puedes abrir `public/index.html` con la extensión **Live Server** de VS Code / Antigravity o servir la carpeta `public`:
+```bash
+python -m http.server 3000 --directory public
+```
 
 ---
 
-## Convenciones de código
+## 6. Despliegue en Vercel y Neon.tech
 
-### General
-
-- Todo el código y comentarios se escriben **en español**.
-- Indentación: **2 espacios** (HTML, CSS, JS).
-- Comillas: **simples** en JavaScript.
-- Sin punto y coma opcional en JS — se usa siempre.
-
-### HTML
-
-- Estructura semántica: usar `<main>`, `<section>`, `<nav>`, `<article>` según corresponda.
-- Los atributos `id` usan `kebab-case` (ej: `id="btn-login"`).
-- Los atributos `class` usan `kebab-case` (ej: `class="form-group"`).
-
-### CSS
-
-- Variables globales en `shared/css/variables.css`.
-- Cada módulo tiene su propio archivo CSS (ej: `login/login.css`).
-- No usar `!important` salvo casos excepcionales justificados.
-- Orden de propiedades: posición → display → box model → tipografía → visual → animación.
-
-### JavaScript
-
-- Variables y funciones en `camelCase` (ej: `handleLogin`, `formatNit`).
-- Constantes globales en `UPPER_SNAKE_CASE`.
-- Una función — una responsabilidad. Funciones cortas y descriptivas.
-- Toda llamada al backend pasa por `shared/js/api.js`. No hacer `fetch` directo en los módulos.
-- Manejo de errores con `try/catch` en todas las llamadas asíncronas.
-
-### Git
-
-- Ramas: `main` (producción), `develop` (desarrollo activo).
-- Ramas de feature: `feature/nombre-modulo` (ej: `feature/dashboard`).
-- Commits en español, en imperativo y descriptivos:
-  ```
-  ✅ Agrega validación de NIT en formulario de registro
-  ✅ Corrige error de sincronización offline en módulo de gastos
-  ❌ fix
-  ❌ cambios varios
-  ```
-- Nunca hacer push directo a `main`. Siempre mediante Pull Request revisado.
+1. **Base de datos en Neon.tech:**
+   - El proyecto se conecta a una instancia PostgreSQL Serverless en Neon.
+   - Al iniciar la función en `api/index.py`, la instrucción `models.Base.metadata.create_all(bind=database.engine)` garantiza que la tabla `empresas` exista.
+2. **Despliegue en Vercel:**
+   - En el panel de Vercel (**Settings → Environment Variables**), se configura la variable `DATABASE_URL` con la URL del Pooler de Neon.tech.
+   - `vercel.json` compila `api/index.py` con `@vercel/python` y sirve `public/**` con `@vercel/static`.
 
 ---
 
-## Cómo contribuir
+## 7. Identidad Visual
 
-1. **Clonar el repositorio**
-   ```bash
-   git clone https://github.com/bill-zen-desarrollo/bill_zen.git
-   ```
-
-2. **Crear una rama para tu módulo o corrección**
-   ```bash
-   git checkout -b feature/nombre-del-modulo
-   ```
-
-3. **Desarrollar y hacer commits descriptivos**
-   ```bash
-   git add .
-   git commit -m "Agrega estructura base del módulo de contactos"
-   ```
-
-4. **Subir la rama**
-   ```bash
-   git push origin feature/nombre-del-modulo
-   ```
-
-5. **Abrir un Pull Request** hacia `develop` en GitHub con una descripción clara de los cambios.
-
-6. **Revisión** — el otro miembro del equipo revisa y aprueba antes de hacer merge.
-
-> Cada módulo nuevo debe incluir su HTML, CSS y JS dentro de su carpeta en `intranet/modules/`.
+| Variable CSS | Color | Uso principal |
+|--------------|-------|---------------|
+| `--accent` | `#0a6f52` | Verde principal de marca, botones primarios y enlaces activos |
+| `--bg` | `#f5f3ef` | Fondo cálido general de la aplicación |
+| `--dark` | `#0f1117` | Fondos oscuros (Hero, tarjetas destacadas, Footer) |
+| `--surface` | `#ffffff` | Superficie de tarjetas y formularios |
+| `#F5A623` | Naranja | Indicadores de estado en proceso (ej. *DIAN en proceso*) |
 
 ---
 
-## Equipo
+## 8. Equipo y Contacto
 
-| Nombre | Rol | GitHub |
-|--------|-----|--------|
-| Juan Camilo Rojas | Frontend Developer | [@JuanCaRojas-18](https://github.com/JuanCaRojas-18) |
-| Camilo Alarcón | Backend Developer | — |
-
----
-
-*Billzen — Facturación electrónica para MiPyMEs colombianas.*
+- **Juan Camilo Rojas** — Co-fundador & Frontend
+- **Camilo Alarcón** — Co-fundador & Backend
+- **GitHub Organización:** [bill-zen-desarrollo](https://github.com/bill-zen-desarrollo)
+- **Correo de contacto:** [zentech.solutions.co@gmail.com](mailto:zentech.solutions.co@gmail.com)
+- **WhatsApp:** [+57 322 310 9301](https://wa.me/573223109301)
