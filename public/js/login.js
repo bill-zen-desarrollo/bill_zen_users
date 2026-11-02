@@ -1,10 +1,6 @@
-// ==========================================
-// CONFIGURACIÓN DE RED
-// ==========================================
-// Utiliza la constante API_BASE_URL provista por js/config.js
+
 const API_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://127.0.0.1:8000/api';
 
-/* ---- Tab switching ---- */
 function switchTab(tab) {
   ['login','register'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === tab);
@@ -23,7 +19,6 @@ function switchTab(tab) {
   card.style.animation = 'fadeSlideUp 0.38s cubic-bezier(0.22,1,0.36,1) both';
 }
 
-/* ---- Password visibility ---- */
 function toggleEye(inputId, btn) {
   const el = document.getElementById(inputId);
   const isText = el.type === 'text';
@@ -31,7 +26,7 @@ function toggleEye(inputId, btn) {
   btn.style.color = isText ? '' : 'var(--accent)';
 }
 
-/* ---- Password strength ---- */
+
 function updateStrength(val) {
   let score = 0;
   if (val.length >= 8) score++;
@@ -45,9 +40,7 @@ function updateStrength(val) {
   });
 }
 
-// ==========================================
-// INTEGRACIÓN CON BACKEND: LOGIN
-// ==========================================
+
 async function handleLogin(e) {
   e.preventDefault();
   let ok = true;
