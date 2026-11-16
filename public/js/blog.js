@@ -1,4 +1,3 @@
-
 const bar = document.getElementById('progress-bar');
 window.addEventListener('scroll', () => {
   const total = document.body.scrollHeight - window.innerHeight;
@@ -40,8 +39,32 @@ document.addEventListener('click', (e) => {
 });
 
 // ==========================================================
-// AUTENTICACIÓN & VISTA DE CLIENTE EN NAVBAR (BLOG)
+// AUTENTICACIÓN TEMPORAL & EXPIRACIÓN DE SESIÓN (BLOG)
 // ==========================================================
+const SESSION_DURATION_MS = 15 * 60 * 1000;
+
+localStorage.removeItem('bz_empresa_nit');
+localStorage.removeItem('bz_empresa_nombre');
+localStorage.removeItem('bz_empresa_token');
+
+function isSessionValid() {
+  const nit = sessionStorage.getItem('bz_empresa_nit');
+  if (!nit) return false;
+
+  const expiresAt = parseInt(sessionStorage.getItem('bz_session_expires') || '0', 10);
+  if (!expiresAt || Date.now() > expiresAt) {
+    handleLogout();
+    return false;
+  }
+  return true;
+}
+
+function renewSessionActivity() {
+  if (sessionStorage.getItem('bz_empresa_nit')) {
+    sessionStorage.setItem('bz_session_expires', String(Date.now() + SESSION_DURATION_MS));
+  }
+}
+
 function getInitials(name, nit) {
   if (name && typeof name === 'string' && name.trim()) {
     const words = name.trim().split(/\s+/);
@@ -57,13 +80,12 @@ function getInitials(name, nit) {
 }
 
 function initAuth() {
-  const nit = sessionStorage.getItem('bz_empresa_nit') || localStorage.getItem('bz_empresa_nit');
-  const nombre = sessionStorage.getItem('bz_empresa_nombre') || localStorage.getItem('bz_empresa_nombre');
-
   const ctaGuest = document.getElementById('nav-cta-guest');
   const ctaUser = document.getElementById('nav-cta-user');
 
-  if (nit) {
+  if (isSessionValid()) {
+    const nit = sessionStorage.getItem('bz_empresa_nit');
+    const nombre = sessionStorage.getItem('bz_empresa_nombre');
     const initials = getInitials(nombre, nit);
     const displayName = nombre || `Empresa ${nit}`;
     const displayNit = `NIT ${nit}`;
@@ -93,11 +115,15 @@ function handleLogout() {
   sessionStorage.removeItem('bz_empresa_nit');
   sessionStorage.removeItem('bz_empresa_nombre');
   sessionStorage.removeItem('bz_empresa_token');
+  sessionStorage.removeItem('bz_session_expires');
   localStorage.removeItem('bz_empresa_nit');
   localStorage.removeItem('bz_empresa_nombre');
   localStorage.removeItem('bz_empresa_token');
 
-  initAuth();
+  const ctaGuest = document.getElementById('nav-cta-guest');
+  const ctaUser = document.getElementById('nav-cta-user');
+  if (ctaGuest) ctaGuest.style.display = 'flex';
+  if (ctaUser) ctaUser.style.display = 'none';
 }
 
 // Listener para cerrar sesión
@@ -105,6 +131,13 @@ const btnLogout = document.getElementById('nav-btn-logout');
 if (btnLogout) {
   btnLogout.addEventListener('click', handleLogout);
 }
+
+['click', 'keydown'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    if (isSessionValid()) renewSessionActivity();
+  }, { passive: true });
+});
+setInterval(initAuth, 30000);
 
 // Inicializar estado de autenticación al cargar blog.html
 initAuth();
