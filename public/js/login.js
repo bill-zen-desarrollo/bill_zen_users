@@ -1,5 +1,19 @@
-
 const API_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://127.0.0.1:8000/api';
+
+// Duración máxima de la sesión activa (15 minutos) y solo mientras la pestaña esté abierta
+const SESSION_DURATION_MS = 15 * 60 * 1000;
+
+function guardarSesionTemporal(nitVal, nombreVal, planVal = '') {
+  // Limpiar cualquier rastro antiguo en localStorage para que no quede sesión perpetua
+  localStorage.removeItem('bz_empresa_nit');
+  localStorage.removeItem('bz_empresa_nombre');
+  localStorage.removeItem('bz_empresa_token');
+
+  sessionStorage.setItem('bz_empresa_nit', nitVal);
+  sessionStorage.setItem('bz_empresa_nombre', nombreVal);
+  sessionStorage.setItem('bz_empresa_plan', planVal || '');
+  sessionStorage.setItem('bz_session_expires', String(Date.now() + SESSION_DURATION_MS));
+}
 
 function switchTab(tab) {
   ['login','register'].forEach(t => {
@@ -75,11 +89,9 @@ async function handleLogin(e) {
         const data = await response.json();
         const nitVal = nitInput.value.trim();
         const nombreVal = data.nombre_empresa || `NIT ${nitVal}`;
+        const planVal = data.plan || '';
         
-        sessionStorage.setItem('bz_empresa_nit', nitVal);
-        sessionStorage.setItem('bz_empresa_nombre', nombreVal);
-        localStorage.setItem('bz_empresa_nit', nitVal);
-        localStorage.setItem('bz_empresa_nombre', nombreVal);
+        guardarSesionTemporal(nitVal, nombreVal, planVal);
         
         btn.style.background = '#059669';
         btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Acceso concedido';
@@ -92,8 +104,15 @@ async function handleLogin(e) {
           autoCloseMs: 1800,
           onClose: () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const target = urlParams.get('redirect') === 'descargar' ? '#descargar' : '';
-            window.location.href = `index.html${target}`;
+            const redir = urlParams.get('redirect');
+            const planPendiente = urlParams.get('plan');
+            if (redir === 'planes' && planPendiente) {
+              window.location.href = `index.html?checkout=${encodeURIComponent(planPendiente)}#planes`;
+            } else if (redir === 'descargar') {
+              window.location.href = planVal ? 'index.html#descargar' : 'index.html?aviso=sin_plan#planes';
+            } else {
+              window.location.href = planVal ? 'index.html#descargar' : 'index.html#planes';
+            }
           }
         });
 
@@ -300,18 +319,22 @@ async function handleRegister(e) {
           const loginData = await loginRes.json();
           const nitVal = nitInput.value.trim();
           const nombreVal = loginData.nombre_empresa || razonSocialInput.value.trim() || `NIT ${nitVal}`;
+          const planVal = loginData.plan || '';
 
-          sessionStorage.setItem('bz_empresa_nit', nitVal);
-          sessionStorage.setItem('bz_empresa_nombre', nombreVal);
-          localStorage.setItem('bz_empresa_nit', nitVal);
-          localStorage.setItem('bz_empresa_nombre', nombreVal);
+          guardarSesionTemporal(nitVal, nombreVal, planVal);
 
           btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ¡Registro exitoso!';
 
           const redirectAfterRegister = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const target = urlParams.get('redirect') === 'descargar' ? '#descargar' : '';
-            window.location.href = `index.html${target}`;
+            const redir = urlParams.get('redirect');
+            const planPendiente = urlParams.get('plan');
+            if (redir === 'planes' && planPendiente) {
+              window.location.href = `index.html?checkout=${encodeURIComponent(planPendiente)}#planes`;
+            } else {
+              // Al recién registrarse aún no tiene plan, llevarlo a elegir plan antes de descargar
+              window.location.href = 'index.html?aviso=sin_plan#planes';
+            }
           };
           showModal({
             type: 'success',
@@ -364,4 +387,3 @@ async function handleRegister(e) {
 }
 
 if(window.location.hash === '#register') { setTimeout(() => switchTab('register'), 100); }
-
