@@ -67,8 +67,9 @@ MAPA_PLANES = {
     "standart": "standart",
     "standard": "standart",
     "estandar": "standart",
-    "ultra": "pro",
-    "pro": "pro",
+    "ultra": "ultra",
+    "pro": "ultra",
+    "premium": "ultra",
 }
 
 @app.post("/api/register")
@@ -148,15 +149,33 @@ def seleccionar_plan(payload: SeleccionarPlanPayload, db: Session = Depends(data
     }
 
 @app.get("/api/plan/estado")
-def estado_plan(nit: str, db: Session = Depends(database.get_db)):
-    db_empresa = db.query(models.Empresa).filter(models.Empresa.nit == nit.strip()).first()
+def estado_plan(
+    nit: Optional[str] = None,
+    email: Optional[str] = None,
+    hardware_id: Optional[str] = None,
+    db: Session = Depends(database.get_db),
+):
+    filtros = []
+    if hardware_id and hardware_id.strip():
+        filtros.append(models.Empresa.hardware_id_vinculado == hardware_id.strip())
+    if nit and nit.strip():
+        filtros.append(models.Empresa.nit == nit.strip())
+    if email and email.strip():
+        filtros.append(func.lower(models.Empresa.email) == email.strip().lower())
+
+    if not filtros:
+        raise HTTPException(status_code=400, detail="Debe indicar nit, email o hardware_id")
+
+    db_empresa = db.query(models.Empresa).filter(or_(*filtros)).first()
     if not db_empresa:
         raise HTTPException(status_code=404, detail="Empresa no encontrada")
     return {
         "ok": True,
         "nit": db_empresa.nit,
+        "email": db_empresa.email,
         "razon_social": db_empresa.razon_social,
-        "plan": db_empresa.plan_adquirido
+        "plan": db_empresa.plan_adquirido,
+        "plan_adquirido": db_empresa.plan_adquirido,
     }
 
 @app.post("/api/licencia/activar")
