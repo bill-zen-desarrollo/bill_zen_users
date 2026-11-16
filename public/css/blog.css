@@ -944,6 +944,7 @@ footer {
 
 
 @media (max-width: 600px) {
+  .nav-extra { display: none; }
   .more-grid { grid-template-columns: 1fr; }
   .article-stats { grid-template-columns: 1fr; }
   .author-box { flex-direction: column; }
