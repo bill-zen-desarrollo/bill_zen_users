@@ -11,3 +11,5 @@ class Empresa(Base):
     apellidos_admin = Column(String)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    plan_adquirido = Column(String, nullable=True, default=None)
+    hardware_id_vinculado = Column(String, nullable=True, default=None)
