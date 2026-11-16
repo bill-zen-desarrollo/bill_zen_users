@@ -54,7 +54,7 @@ document.addEventListener('click', (e) => {
 });
 
 // ==========================================================
-// AUTENTICACIÓN TEMPORAL & ESTADO DEL PLAN (15 MINUTOS)
+// AUTENTICACIÓN TEMPORAL & MATRIZ OFICIAL DE PLANES BILLZEN
 // ==========================================================
 const SESSION_DURATION_MS = 15 * 60 * 1000;
 
@@ -62,30 +62,62 @@ localStorage.removeItem('bz_empresa_nit');
 localStorage.removeItem('bz_empresa_nombre');
 localStorage.removeItem('bz_empresa_token');
 
+function normalizePlanCode(raw) {
+  const val = (raw || '').trim().toLowerCase();
+  if (val === 'standard' || val === 'standart' || val === 'plus') return 'standart';
+  if (val === 'ultra' || val === 'pro' || val === 'premium') return 'ultra';
+  if (val === 'basico' || val === 'básico' || val === 'free') return 'basico';
+  return '';
+}
+
 const PLAN_META = {
   basico: {
     code: 'basico',
-    name: 'Plan Básico (Free)',
-    shortName: 'Básico',
-    priceNum: 0,
-    priceLabel: '$0 COP / mes',
-    desc: 'Facturación POS, Productos, Inventario y Configuración (1 usuario)'
+    name: 'Plan Básico',
+    shortName: 'BÁSICO',
+    priceNum: 49900,
+    priceLabel: '$49.900 COP / mes',
+    buttonLabel: 'Adquirir Plan Básico ($49.900)',
+    desc: 'POS de escritorio (tirilla local sin DIAN), Productos, Inventario y 1 usuario Cajero (aparte del Admin).',
+    bullets: [
+      '✓ Facturación POS local, Productos e Inventario',
+      '✓ 1 usuario Cajero activo (además del Administrador)',
+      '✕ Sin Facturación Electrónica DIAN',
+      '✕ Sin Contabilidad (P&G) ni Reportes Analíticos',
+      '✕ Sin Auditoría Remota Móvil (QR)'
+    ]
   },
   standart: {
     code: 'standart',
-    name: 'Plan Standart (Plus)',
-    shortName: 'Standart',
-    priceNum: 89000,
-    priceLabel: '$89.000 COP / mes',
-    desc: 'Incluye Contabilidad (P&G), Reportes Analíticos y Múltiples Cajeros'
+    name: 'Plan Standard',
+    shortName: 'STANDARD',
+    priceNum: 119900,
+    priceLabel: '$119.900 COP / mes',
+    buttonLabel: 'Adquirir Plan Standard ($119.900)',
+    desc: 'Stack completo de escritorio: Facturación Electrónica DIAN (CUFE), Contabilidad (P&G), Reportes y Cajeros ilimitados (sin Auditoría Móvil).',
+    bullets: [
+      '✓ Facturación Electrónica DIAN Certificada (CUFE)',
+      '✓ Contabilidad (Gastos y Estado de Resultados P&G)',
+      '✓ Reportes Analíticos + Exportación CSV / Excel',
+      '✓ Usuarios Cajeros Ilimitados (aparte del Admin)',
+      '✕ Sin Auditoría Remota Móvil (QR)'
+    ]
   },
-  pro: {
-    code: 'pro',
-    name: 'Plan Pro (Ultra)',
-    shortName: 'Pro',
-    priceNum: 249000,
-    priceLabel: '$249.000 COP / mes',
-    desc: '100% Desbloqueado + Auditoría Remota Móvil en Vivo (QR + App Kotlin)'
+  ultra: {
+    code: 'ultra',
+    name: 'Plan Ultra',
+    shortName: 'ULTRA',
+    priceNum: 199900,
+    priceLabel: '$199.900 COP / mes',
+    buttonLabel: 'Adquirir Plan Ultra ($199.900)',
+    desc: '100% Todo Incluido: Stack completo de escritorio + Facturación Electrónica DIAN + Auditoría Remota Móvil en Vivo (QR + App Kotlin).',
+    bullets: [
+      '✓ 100% del Ecosistema BillZen Desbloqueado',
+      '✓ 📱 Auditoría Remota Móvil en Vivo (QR + App Kotlin)',
+      '✓ Facturación Electrónica DIAN Certificada (CUFE)',
+      '✓ Contabilidad (P&G), Reportes y Cajeros Ilimitados',
+      '✓ Soporte Prioritario 24/7'
+    ]
   }
 };
 
@@ -103,7 +135,7 @@ function isSessionValid() {
 
 function getCurrentPlan() {
   if (!isSessionValid()) return '';
-  return (sessionStorage.getItem('bz_empresa_plan') || '').trim().toLowerCase();
+  return normalizePlanCode(sessionStorage.getItem('bz_empresa_plan') || '');
 }
 
 function renewSessionActivity() {
@@ -136,7 +168,7 @@ function initAuth() {
     const plan = getCurrentPlan();
     const initials = getInitials(nombre, nit);
     const displayName = nombre || `Empresa ${nit}`;
-    const planTag = plan && PLAN_META[plan] ? ` · Plan ${PLAN_META[plan].shortName.toUpperCase()}` : ' · Sin plan';
+    const planTag = plan && PLAN_META[plan] ? ` · PLAN ${PLAN_META[plan].shortName}` : ' · Sin plan';
     const displayNit = `NIT ${nit}${planTag}`;
 
     if (ctaGuest) ctaGuest.style.display = 'none';
@@ -198,7 +230,7 @@ function injectCheckoutStyles() {
   st.textContent = `
     .bz-overlay { position:fixed; inset:0; background:rgba(15,17,23,0.68); backdrop-filter:blur(6px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; transition:opacity .2s ease; }
     .bz-overlay.show { opacity:1; }
-    .bz-checkout-box { background:#ffffff; color:#0f1117; width:100%; max-width:480px; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.28); overflow:hidden; font-family:'Sora',sans-serif; transform:translateY(12px); transition:transform .22s ease; }
+    .bz-checkout-box { background:#ffffff; color:#0f1117; width:100%; max-width:500px; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.28); overflow:hidden; font-family:'Sora',sans-serif; transform:translateY(12px); transition:transform .22s ease; max-height:92vh; overflow-y:auto; }
     .bz-overlay.show .bz-checkout-box { transform:translateY(0); }
     .bz-chk-head { background:#123829; color:#ffffff; padding:18px 22px; display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #c9a646; }
     .bz-chk-head h3 { font-family:'Fraunces',serif; font-size:18px; font-weight:600; margin:0; }
@@ -206,6 +238,8 @@ function injectCheckoutStyles() {
     .bz-chk-body { padding:22px; }
     .bz-chk-summary { background:#f5efe3; border:1px solid #e8dcc4; border-radius:10px; padding:14px 16px; margin-bottom:16px; }
     .bz-chk-summary-row { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#5a5f72; margin-bottom:4px; }
+    .bz-chk-bullets { margin:8px 0; padding-left:0; list-style:none; font-size:12px; color:#2b2b2b; }
+    .bz-chk-bullets li { padding:2px 0; }
     .bz-chk-summary-total { display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:600; color:#123829; margin-top:8px; padding-top:8px; border-top:1px solid #e8dcc4; }
     .bz-pay-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
     .bz-pay-tab { padding:9px 8px; border:1px solid rgba(15,17,23,0.14); border-radius:8px; background:#fff; font-size:12px; font-weight:600; cursor:pointer; text-align:center; color:#5a5f72; transition:all .15s; }
@@ -259,103 +293,99 @@ function showSimpleAlert({ title, message, buttonText = 'Entendido', onConfirm =
 
 function openCheckoutModal(planKey) {
   injectCheckoutStyles();
-  const meta = PLAN_META[planKey] || PLAN_META.basico;
+  const normKey = normalizePlanCode(planKey) || 'basico';
+  const meta = PLAN_META[normKey] || PLAN_META.basico;
   const nit = sessionStorage.getItem('bz_empresa_nit') || '';
   const empresa = sessionStorage.getItem('bz_empresa_nombre') || `NIT ${nit}`;
 
   const prev = document.getElementById('bz-custom-overlay');
   if (prev) prev.remove();
 
-  const esGratis = meta.priceNum === 0;
   const overlay = document.createElement('div');
   overlay.id = 'bz-custom-overlay';
   overlay.className = 'bz-overlay';
 
+  const bulletsHtml = meta.bullets.map(b => `<li>${b}</li>`).join('');
+
   overlay.innerHTML = `
     <div class="bz-checkout-box">
       <div class="bz-chk-head">
-        <h3>${esGratis ? 'Activar Suscripción' : 'Pasarela de Pago BillZen'}</h3>
-        <span class="bz-chk-badge">${esGratis ? 'Sin Costo' : 'Modo Demo Seguro'}</span>
+        <h3>Pasarela de Pago · ${meta.name}</h3>
+        <span class="bz-chk-badge">Modo Demo Seguro</span>
       </div>
       <div class="bz-chk-body">
         <div class="bz-chk-summary">
           <div class="bz-chk-summary-row"><span>Empresa:</span><strong>${empresa}</strong></div>
           <div class="bz-chk-summary-row"><span>NIT:</span><strong>${nit}</strong></div>
-          <div class="bz-chk-summary-row"><span>Plan elegido:</span><strong>${meta.name}</strong></div>
-          <div style="font-size:12px;color:#5a5f72;margin-top:4px;">${meta.desc}</div>
+          <div class="bz-chk-summary-row"><span>Plan a activar en ERP y Nube:</span><strong>${meta.name} (★ PLAN ${meta.shortName})</strong></div>
+          <ul class="bz-chk-bullets">${bulletsHtml}</ul>
           <div class="bz-chk-summary-total">
             <span>Total a pagar:</span>
             <span>${meta.priceLabel}</span>
           </div>
         </div>
 
-        ${esGratis ? `
-          <p style="font-size:13px;color:#5a5f72;margin-bottom:12px;">
-            El <strong>Plan Básico (Free)</strong> no tiene costo mensual. Al confirmarlo quedará vinculado a tu NIT en Neon.tech y se habilitará tu descarga del instalador <code>BillZen.exe</code>.
-          </p>
-        ` : `
-          <div class="bz-pay-tabs">
-            <button type="button" class="bz-pay-tab active" data-method="tarjeta">💳 Tarjeta</button>
-            <button type="button" class="bz-pay-tab" data-method="pse">🏦 PSE</button>
-            <button type="button" class="bz-pay-tab" data-method="nequi">📱 Nequi</button>
+        <div class="bz-pay-tabs">
+          <button type="button" class="bz-pay-tab active" data-method="tarjeta">💳 Tarjeta</button>
+          <button type="button" class="bz-pay-tab" data-method="pse">🏦 PSE</button>
+          <button type="button" class="bz-pay-tab" data-method="nequi">📱 Nequi</button>
+        </div>
+
+        <button type="button" class="bz-demo-fill" id="btn-autofill-demo">
+          ⚡ Autocompletar datos de tarjeta de demostración
+        </button>
+
+        <div id="pay-form-tarjeta">
+          <div class="bz-field">
+            <label>Número de tarjeta</label>
+            <input type="text" id="chk-card-num" placeholder="4532 •••• •••• 8891" maxlength="19" value="4532 8910 4421 8891" />
           </div>
-
-          <button type="button" class="bz-demo-fill" id="btn-autofill-demo">
-            ⚡ Autocompletar datos de tarjeta de demostración
-          </button>
-
-          <div id="pay-form-tarjeta">
+          <div class="bz-field">
+            <label>Nombre en la tarjeta</label>
+            <input type="text" id="chk-card-name" placeholder="Nombre del titular" value="${empresa.toUpperCase()}" />
+          </div>
+          <div class="bz-field-row">
             <div class="bz-field">
-              <label>Número de tarjeta</label>
-              <input type="text" id="chk-card-num" placeholder="4532 •••• •••• 8891" maxlength="19" value="4532 8910 4421 8891" />
+              <label>Vencimiento (MM/AA)</label>
+              <input type="text" id="chk-card-exp" placeholder="12/28" maxlength="5" value="12/28" />
             </div>
             <div class="bz-field">
-              <label>Nombre en la tarjeta</label>
-              <input type="text" id="chk-card-name" placeholder="Nombre del titular" value="${empresa.toUpperCase()}" />
-            </div>
-            <div class="bz-field-row">
-              <div class="bz-field">
-                <label>Vencimiento (MM/AA)</label>
-                <input type="text" id="chk-card-exp" placeholder="12/28" maxlength="5" value="12/28" />
-              </div>
-              <div class="bz-field">
-                <label>CVV</label>
-                <input type="password" id="chk-card-cvv" placeholder="•••" maxlength="4" value="842" />
-              </div>
+              <label>CVV</label>
+              <input type="password" id="chk-card-cvv" placeholder="•••" maxlength="4" value="842" />
             </div>
           </div>
+        </div>
 
-          <div id="pay-form-pse" style="display:none;">
-            <div class="bz-field">
-              <label>Selecciona tu Banco (PSE Colombia)</label>
-              <select id="chk-pse-bank">
-                <option value="Bancolombia">Bancolombia</option>
-                <option value="Banco de Bogotá">Banco de Bogotá</option>
-                <option value="Davivienda">Davivienda</option>
-                <option value="BBVA Colombia">BBVA Colombia</option>
-                <option value="Nequi / Daviplata">Nequi / Daviplata</option>
-              </select>
-            </div>
-            <div class="bz-field">
-              <label>Tipo de persona</label>
-              <select><option>Persona Jurídica (Empresa)</option><option>Persona Natural</option></select>
-            </div>
+        <div id="pay-form-pse" style="display:none;">
+          <div class="bz-field">
+            <label>Selecciona tu Banco (PSE Colombia)</label>
+            <select id="chk-pse-bank">
+              <option value="Bancolombia">Bancolombia</option>
+              <option value="Banco de Bogotá">Banco de Bogotá</option>
+              <option value="Davivienda">Davivienda</option>
+              <option value="BBVA Colombia">BBVA Colombia</option>
+              <option value="Nequi / Daviplata">Nequi / Daviplata</option>
+            </select>
           </div>
+          <div class="bz-field">
+            <label>Tipo de persona</label>
+            <select><option>Persona Jurídica (Empresa)</option><option>Persona Natural</option></select>
+          </div>
+        </div>
 
-          <div id="pay-form-nequi" style="display:none;">
-            <div class="bz-field">
-              <label>Número de celular Nequi</label>
-              <input type="text" id="chk-nequi-tel" placeholder="300 123 4567" value="300 555 8910" />
-            </div>
+        <div id="pay-form-nequi" style="display:none;">
+          <div class="bz-field">
+            <label>Número de celular Nequi</label>
+            <input type="text" id="chk-nequi-tel" placeholder="300 123 4567" value="300 555 8910" />
           </div>
-        `}
+        </div>
 
         <div id="chk-error-msg" style="display:none;color:#c94040;font-size:12px;font-weight:600;margin-top:6px;"></div>
 
         <div class="bz-chk-actions">
           <button type="button" class="bz-btn-cancel" id="btn-chk-cancel">Cancelar</button>
           <button type="button" class="bz-btn-pay" id="btn-chk-confirm">
-            ${esGratis ? '✓ Confirmar Plan Básico' : '🔒 Simular Pago y Activar Plan'}
+            🔒 Pagar ${meta.priceLabel} y Activar ${meta.name}
           </button>
         </div>
       </div>
@@ -365,9 +395,8 @@ function openCheckoutModal(planKey) {
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add('show'));
 
-  let metodoElegido = esGratis ? 'gratis' : 'tarjeta';
+  let metodoElegido = 'tarjeta';
 
-  // Tabs de método de pago
   overlay.querySelectorAll('.bz-pay-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       overlay.querySelectorAll('.bz-pay-tab').forEach(t => t.classList.remove('active'));
@@ -406,7 +435,7 @@ function openCheckoutModal(planKey) {
     const errEl = overlay.querySelector('#chk-error-msg');
     errEl.style.display = 'none';
     btnConfirm.disabled = true;
-    btnConfirm.textContent = '⏳ Procesando y vinculando plan...';
+    btnConfirm.textContent = '⏳ Procesando pago y activando ' + meta.name + '...';
 
     try {
       const refPago = 'BZ-DEMO-' + Math.floor(100000 + Math.random() * 900000);
@@ -427,13 +456,13 @@ function openCheckoutModal(planKey) {
       }
 
       const data = await res.json();
-      const planGuardado = (data.plan || meta.code).toLowerCase();
+      const planGuardado = normalizePlanCode(data.plan || meta.code) || meta.code;
       sessionStorage.setItem('bz_empresa_plan', planGuardado);
       renewSessionActivity();
       initAuth();
 
       btnConfirm.style.background = '#059669';
-      btnConfirm.textContent = '✓ ¡Plan Activado! Redirigiendo a descarga...';
+      btnConfirm.textContent = '✓ ¡' + meta.name + ' Activado! Redirigiendo a descarga...';
 
       setTimeout(() => {
         closeModal();
@@ -444,7 +473,7 @@ function openCheckoutModal(planKey) {
       }, 900);
     } catch (err) {
       btnConfirm.disabled = false;
-      btnConfirm.textContent = esGratis ? '✓ Confirmar Plan Básico' : '🔒 Simular Pago y Activar Plan';
+      btnConfirm.textContent = '🔒 Pagar ' + meta.priceLabel + ' y Activar ' + meta.name;
       errEl.textContent = err.message || 'Error de conexión con el servidor.';
       errEl.style.display = 'block';
     }
@@ -457,11 +486,73 @@ function openCheckoutModal(planKey) {
 function setupPlanCardsAndBanner() {
   injectCheckoutStyles();
   const cards = document.querySelectorAll('#planes .plan-card');
-  const mapping = ['basico', 'standart', 'pro'];
+  const mapping = ['basico', 'standart', 'ultra'];
+
+  const cardConfigs = {
+    basico: {
+      title: 'Plan Básico',
+      priceHtml: '<span>$</span>49.9K',
+      period: 'COP / mes &bull; 1 Admin + 1 Cajero',
+      features: [
+        { ok: true, text: 'Facturación POS Local (Tirilla de venta)' },
+        { ok: true, text: 'Catálogo de Productos e Inventario' },
+        { ok: true, text: '1 Usuario Cajero activo (+ Administrador)' },
+        { ok: false, text: 'Sin Facturación Electrónica DIAN' },
+        { ok: false, text: 'Sin Contabilidad, Reportes ni Auditoría Móvil' }
+      ]
+    },
+    standart: {
+      title: 'Plan Standard',
+      priceHtml: '<span>$</span>119.9K',
+      period: 'COP / mes &bull; Cajeros ilimitados',
+      features: [
+        { ok: true, text: 'Facturación Electrónica DIAN Certificada (CUFE)', featured: true },
+        { ok: true, text: 'Contabilidad (Gastos y Estado de Resultados P&G)', featured: true },
+        { ok: true, text: 'Reportes Analíticos + Exportación CSV / Excel', featured: true },
+        { ok: true, text: 'Usuarios Cajeros Ilimitados (+ Administrador)', featured: true },
+        { ok: false, text: 'Sin Auditoría Remota Móvil (QR)', featured: true }
+      ]
+    },
+    ultra: {
+      title: 'Plan Ultra',
+      priceHtml: '<span>$</span>199.9K',
+      period: 'COP / mes &bull; Todo incluido sin límites',
+      features: [
+        { ok: true, text: '100% del Stack Completo Desbloqueado' },
+        { ok: true, text: '📱 Auditoría Remota Móvil en Vivo (QR + App Kotlin)' },
+        { ok: true, text: 'Facturación Electrónica DIAN Certificada (CUFE)' },
+        { ok: true, text: 'Contabilidad (P&G), Reportes y Cajeros Ilimitados' },
+        { ok: true, text: 'Soporte Prioritario 24/7' }
+      ]
+    }
+  };
 
   cards.forEach((card, idx) => {
     const planKey = mapping[idx] || 'basico';
+    const cfg = cardConfigs[planKey];
     card.setAttribute('data-plan-key', planKey);
+
+    const nameEl = card.querySelector('.plan-name');
+    const priceEl = card.querySelector('.plan-price');
+    const periodEl = card.querySelector('.plan-period');
+    const ulEl = card.querySelector('.plan-features');
+
+    if (nameEl) nameEl.textContent = cfg.title;
+    if (priceEl) priceEl.innerHTML = cfg.priceHtml;
+    if (periodEl) periodEl.innerHTML = cfg.period;
+    if (ulEl) {
+      ulEl.innerHTML = cfg.features.map(f => {
+        if (f.ok) {
+          const checkStyle = f.featured ? 'style="background:rgba(74,232,164,0.15)"' : '';
+          const strokeCol = f.featured ? '#4AE8A4' : 'var(--accent)';
+          return `<li class="plan-feature"><div class="plan-feature-check" ${checkStyle}><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="${strokeCol}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>${f.text}</li>`;
+        } else {
+          const crossStyle = f.featured ? 'style="background:rgba(255,255,255,0.06)"' : '';
+          const strokeCol = f.featured ? 'rgba(255,255,255,0.35)' : 'var(--text3)';
+          return `<li class="plan-feature"><div class="plan-feature-check feat-cross" ${crossStyle}><svg viewBox="0 0 10 10" fill="none"><path d="M3 3l4 4M7 3l-4 4" stroke="${strokeCol}" stroke-width="1.5" stroke-linecap="round"/></svg></div>${f.text}</li>`;
+        }
+      }).join('');
+    }
 
     let badge = card.querySelector('.plan-selected-badge');
     if (!badge) {
@@ -487,7 +578,6 @@ function setupPlanCardsAndBanner() {
     }
   });
 
-  // Crear banner informativo en #descargar si no existe
   const dlHead = document.querySelector('#descargar .section-head');
   if (dlHead && !document.getElementById('dl-plan-banner')) {
     const banner = document.createElement('div');
@@ -509,6 +599,7 @@ function renderPlanStates() {
     const badge = card.querySelector('.plan-selected-badge');
     const btn = card.querySelector('a.btn, button.btn');
     const esSeleccionado = logged && planActual && key === planActual;
+    const meta = PLAN_META[key] || PLAN_META.basico;
 
     card.classList.toggle('plan-active-card', Boolean(esSeleccionado));
     if (badge) {
@@ -517,12 +608,8 @@ function renderPlanStates() {
     if (btn) {
       if (esSeleccionado) {
         btn.textContent = '✓ Plan Seleccionado · Ir a Descargar';
-      } else if (key === 'basico') {
-        btn.textContent = 'Seleccionar Plan Básico ($0)';
-      } else if (key === 'standart') {
-        btn.textContent = 'Comprar Plan Standart ($89K)';
-      } else if (key === 'pro') {
-        btn.textContent = 'Comprar Plan Pro ($249K)';
+      } else {
+        btn.textContent = meta.buttonLabel;
       }
     }
   });
@@ -547,7 +634,7 @@ function renderPlanStates() {
       banner.style.background = '#d6f0e8';
       banner.style.color = '#0a6f52';
       banner.style.border = '1px solid #0a6f52';
-      banner.innerHTML = `&#x2713; <strong>${m.name} Seleccionado</strong> — Tu licencia está lista en la nube. Ya puedes descargar el instalador abajo.`;
+      banner.innerHTML = `&#x2713; <strong>${m.name} (★ PLAN ${m.shortName}) Seleccionado</strong> — Tu licencia está activa en Neon.tech. Ya puedes descargar el instalador abajo.`;
     }
   }
 }
@@ -560,7 +647,7 @@ async function syncPlanFromBackend() {
     const r = await fetch(`${BZ_API_URL}/plan/estado?nit=${encodeURIComponent(nit)}`);
     if (r.ok) {
       const d = await r.json();
-      sessionStorage.setItem('bz_empresa_plan', d.plan || '');
+      sessionStorage.setItem('bz_empresa_plan', normalizePlanCode(d.plan || ''));
       initAuth();
     }
   } catch (_e) {
@@ -572,7 +659,7 @@ setupPlanCardsAndBanner();
 initAuth();
 syncPlanFromBackend().then(() => {
   const params = new URLSearchParams(window.location.search);
-  const checkoutPlan = params.get('checkout');
+  const checkoutPlan = normalizePlanCode(params.get('checkout') || '');
   const aviso = params.get('aviso');
   if (isSessionValid() && checkoutPlan && PLAN_META[checkoutPlan]) {
     openCheckoutModal(checkoutPlan);
@@ -580,7 +667,7 @@ syncPlanFromBackend().then(() => {
   } else if (aviso === 'sin_plan') {
     showSimpleAlert({
       title: 'Elige tu plan para continuar',
-      message: 'Selecciona uno de nuestros planes (Básico, Standart o Pro) para activar tu licencia y habilitar la descarga de BillZen ERP.',
+      message: 'Selecciona uno de nuestros planes (Plan Básico, Plan Standard o Plan Ultra) para activar tu licencia y habilitar la descarga de BillZen ERP.',
       buttonText: 'Ver Planes',
       onConfirm: () => {
         const el = document.getElementById('planes');
@@ -614,7 +701,7 @@ syncPlanFromBackend().then(() => {
     if (!planElegido || !PLAN_META[planElegido]) {
       showSimpleAlert({
         title: 'Selecciona un plan antes de descargar',
-        message: 'Para descargar BillZen ERP primero debes elegir el plan para tu empresa (Básico, Standart o Pro). Te llevaremos a la sección de planes.',
+        message: 'Para descargar BillZen ERP primero debes elegir el plan para tu empresa (Plan Básico, Plan Standard o Plan Ultra). Te llevaremos a la sección de planes.',
         buttonText: 'Ir a seleccionar mi plan',
         onConfirm: () => {
           const secPlanes = document.getElementById('planes');
