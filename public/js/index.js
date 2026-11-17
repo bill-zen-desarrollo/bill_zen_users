@@ -113,7 +113,7 @@ const PLAN_META = {
     desc: '100% Todo Incluido: Stack completo de escritorio + Facturación Electrónica DIAN + Auditoría Remota Móvil en Vivo (QR + App Kotlin).',
     bullets: [
       '✓ 100% del Ecosistema BillZen Desbloqueado',
-      '✓ 📱 Auditoría Remota Móvil en Vivo (QR + App Kotlin)',
+      '✓ Auditoría Remota Móvil en Vivo (QR + App Kotlin)',
       '✓ Facturación Electrónica DIAN Certificada (CUFE)',
       '✓ Contabilidad (P&G), Reportes y Cajeros Ilimitados',
       '✓ Soporte Prioritario 24/7'
@@ -327,8 +327,8 @@ function openCheckoutModal(planKey) {
 
         <div class="bz-pay-tabs">
           <button type="button" class="bz-pay-tab active" data-method="tarjeta">💳 Tarjeta</button>
-          <button type="button" class="bz-pay-tab" data-method="pse">🏦 PSE</button>
-          <button type="button" class="bz-pay-tab" data-method="nequi">📱 Nequi</button>
+          <button type="button" class="bz-pay-tab" data-method="pse">PSE</button>
+          <button type="button" class="bz-pay-tab" data-method="nequi">Nequi</button>
         </div>
 
         <button type="button" class="bz-demo-fill" id="btn-autofill-demo">
@@ -435,7 +435,7 @@ function openCheckoutModal(planKey) {
     const errEl = overlay.querySelector('#chk-error-msg');
     errEl.style.display = 'none';
     btnConfirm.disabled = true;
-    btnConfirm.textContent = '⏳ Procesando pago y activando ' + meta.name + '...';
+    btnConfirm.textContent = 'Procesando pago y activando ' + meta.name + '...';
 
     try {
       const refPago = 'BZ-DEMO-' + Math.floor(100000 + Math.random() * 900000);
@@ -473,7 +473,7 @@ function openCheckoutModal(planKey) {
       }, 900);
     } catch (err) {
       btnConfirm.disabled = false;
-      btnConfirm.textContent = '🔒 Pagar ' + meta.priceLabel + ' y Activar ' + meta.name;
+      btnConfirm.textContent = 'Pagar ' + meta.priceLabel + ' y Activar ' + meta.name;
       errEl.textContent = err.message || 'Error de conexión con el servidor.';
       errEl.style.display = 'block';
     }
@@ -621,13 +621,13 @@ function renderPlanStates() {
       banner.style.background = '#fef3d0';
       banner.style.color = '#8c6d1f';
       banner.style.border = '1px solid #c9a646';
-      banner.innerHTML = '🔒 Para descargar <strong>BillZen ERP</strong> primero debes <a href="login.html?redirect=planes#register" style="color:#0a6f52;font-weight:700;text-decoration:underline;">iniciar sesión o registrarte</a> y seleccionar un plan.';
+      banner.innerHTML = 'Para descargar <strong>BillZen ERP</strong> primero debes <a href="login.html?redirect=planes#register" style="color:#0a6f52;font-weight:700;text-decoration:underline;">iniciar sesión o registrarte</a> y seleccionar un plan.';
     } else if (!planActual || !PLAN_META[planActual]) {
       banner.style.display = 'block';
       banner.style.background = '#fef3d0';
       banner.style.color = '#8c6d1f';
       banner.style.border = '1px solid #c9a646';
-      banner.innerHTML = '⚠️ Aún no has seleccionado ningún plan para tu empresa. <a href="#planes" style="color:#0a6f52;font-weight:700;text-decoration:underline;">Haz clic aquí para elegir tu plan</a> antes de descargar.';
+      banner.innerHTML = 'Aún no has seleccionado ningún plan para tu empresa. <a href="#planes" style="color:#0a6f52;font-weight:700;text-decoration:underline;">Haz clic aquí para elegir tu plan</a> antes de descargar.';
     } else {
       const m = PLAN_META[planActual];
       banner.style.display = 'block';
